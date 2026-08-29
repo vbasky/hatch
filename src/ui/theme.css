@@ -1,5 +1,5 @@
 /*
- * Single source of truth for the Baby Menu design-system @theme.
+ * Single source of truth for the Hatch design-system @theme.
  *
  * Consumed by two places, which is the whole point of having one file:
  *   1. The renderer build (src/ui/styles.css imports this).
@@ -61,4 +61,32 @@
   --radius-lg: 8px;
   --radius-xl: 10px;
   --radius-pill: 9999px;
+}
+
+/*
+ * Light-mode overrides must live in @layer theme. Tailwind emits --color-* on
+ * :root inside that layer; unlayered html[data-theme="light"] rules do not win
+ * for those custom properties in WKWebView, so Settings text-ink stays white
+ * on white. Same-layer + higher specificity is the documented override path.
+ */
+@layer theme {
+  html[data-theme="light"],
+  html.light {
+    --color-void: #f2f2f3;
+    --color-stage: #f6f6f7;
+    --color-surface: #ffffff;
+    --color-elevated: #ececee;
+    --color-pressed: #e2e2e6;
+    --color-ink-strong: rgba(9, 9, 11, 0.92);
+    --color-ink: rgba(9, 9, 11, 0.80);
+    --color-ink-muted: rgba(9, 9, 11, 0.62);
+    --color-ink-soft: rgba(9, 9, 11, 0.48);
+    --color-ink-label: rgba(9, 9, 11, 0.38);
+    --color-ink-faint: rgba(9, 9, 11, 0.22);
+    --color-line: rgba(9, 9, 11, 0.12);
+    --color-line-faint: rgba(9, 9, 11, 0.08);
+    --color-signal-live: #1a9d73;
+    --color-signal-warn: #b8860b;
+    --color-signal-danger: #d64555;
+  }
 }
