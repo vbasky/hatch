@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { cpSync, mkdirSync, existsSync, readdirSync, rmSync, symlinkSync, chmodSync } from "node:fs";
+import { cpSync, mkdirSync, existsSync, readdirSync, rmSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -40,20 +40,4 @@ if (existsSync(rendererSrc)) {
   }
 }
 
-const triple = process.arch === "arm64" ? "aarch64-apple-darwin" : "x86_64-apple-darwin";
-const sidecar = join(rootDir, "src-tauri/binaries", `node-${triple}`);
-const nodeDest = join(destApp, "Contents/MacOS/node");
-if (existsSync(sidecar)) {
-  try {
-    chmodSync(nodeDest, 0o755);
-  } catch {
-    // dest node may be missing or 555 from a failed bundle
-  }
-  cpSync(sidecar, nodeDest);
-  chmodSync(nodeDest, 0o755);
-}
-
-const bundledModules = join(resourcesDest, "node_modules");
-rmSync(bundledModules, { recursive: true, force: true });
-symlinkSync(join(rootDir, "node_modules"), bundledModules);
 console.log(`Copied ${found} -> ${destApp}`);

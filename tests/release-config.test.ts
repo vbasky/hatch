@@ -18,7 +18,7 @@ async function releaseDraftGuard(): Promise<string> {
 }
 
 async function runReleaseDraftGuard(releaseState: "true" | "false" | "missing" | "query-error") {
-  const tempDirectory = await mkdtemp(join(tmpdir(), "baby-menu-release-guard-"));
+  const tempDirectory = await mkdtemp(join(tmpdir(), "hatch-release-guard-"));
   const ghPath = join(tempDirectory, "gh");
   await writeFile(
     ghPath,
@@ -30,8 +30,8 @@ async function runReleaseDraftGuard(releaseState: "true" | "false" | "missing" |
     return await execFileAsync("/bin/bash", ["-c", await releaseDraftGuard()], {
       env: {
         ...process.env,
-        GITHUB_REPOSITORY: "kunchenguid/baby-menu",
-        TAG_NAME: "baby-menu-v0.1.23",
+        GITHUB_REPOSITORY: "kunchenguid/hatch",
+        TAG_NAME: "hatch-v0.1.23",
         GH_RELEASE_STATE: releaseState,
         PATH: `${tempDirectory}:${process.env.PATH ?? ""}`,
       },
@@ -49,7 +49,7 @@ describe("release draft guard", () => {
   it("refuses when the tagged release is already published", async () => {
     await expect(runReleaseDraftGuard("false")).rejects.toMatchObject({
       stderr: expect.stringContaining(
-        "Refusing to build artifacts for a release that is already public: baby-menu-v0.1.23",
+        "Refusing to build artifacts for a release that is already public: hatch-v0.1.23",
       ),
     });
   });
@@ -57,7 +57,7 @@ describe("release draft guard", () => {
   it("fails distinctly when no release exists for the tag", async () => {
     await expect(runReleaseDraftGuard("missing")).rejects.toMatchObject({
       stderr: expect.stringContaining(
-        "No GitHub release exists for tag baby-menu-v0.1.23; refusing to build artifacts.",
+        "No GitHub release exists for tag hatch-v0.1.23; refusing to build artifacts.",
       ),
     });
   });
@@ -65,7 +65,7 @@ describe("release draft guard", () => {
   it("fails explicitly when GitHub release state cannot be queried", async () => {
     await expect(runReleaseDraftGuard("query-error")).rejects.toMatchObject({
       stderr: expect.stringContaining(
-        "Unable to verify draft status for baby-menu-v0.1.23; GitHub release query failed: gh: API unavailable (HTTP 503)",
+        "Unable to verify draft status for hatch-v0.1.23; GitHub release query failed: gh: API unavailable (HTTP 503)",
       ),
     });
   });
@@ -73,10 +73,10 @@ describe("release draft guard", () => {
 
 describe("packaged runtime verification", () => {
   it("recursively rejects esbuild nested in unpacked dependencies", async () => {
-    const tempDirectory = await mkdtemp(join(tmpdir(), "baby-menu-packaged-esbuild-"));
+    const tempDirectory = await mkdtemp(join(tmpdir(), "hatch-packaged-esbuild-"));
     const nestedEsbuildPath = join(
       tempDirectory,
-      "Baby Menu Dev.app",
+      "Hatch Dev.app",
       "Contents",
       "Resources",
       "app.asar.unpacked",
@@ -94,7 +94,7 @@ describe("packaged runtime verification", () => {
       );
       const invocation = [
         `import(${JSON.stringify(verificationScript)})`,
-        `.then(({ assertNoPackagedEsbuild }) => assertNoPackagedEsbuild(${JSON.stringify(join(tempDirectory, "Baby Menu Dev.app"))}))`,
+        `.then(({ assertNoPackagedEsbuild }) => assertNoPackagedEsbuild(${JSON.stringify(join(tempDirectory, "Hatch Dev.app"))}))`,
       ].join("");
       await expect(execFileAsync(process.execPath, ["--input-type=module", "--eval", invocation]))
         .rejects.toMatchObject({
@@ -112,6 +112,14 @@ describe("distribution config", () => {
     expect(packageJson.scripts?.["dist:mac"]).toContain("scripts/create-dmg.mjs");
     expect(packageJson.dependencies?.typescript).toBe("6.0.3");
     expect(packageJson.devDependencies?.["@tauri-apps/cli"]).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
+  it("does not copy a Node sidecar or symlink checkout node_modules into the app bundle", async () => {
+    const copyScript = await readFile(resolve(import.meta.dirname, "../scripts/copy-tauri-app.mjs"), "utf8");
+    expect(copyScript).not.toContain("symlinkSync");
+    expect(copyScript).not.toContain("node_modules");
+    expect(copyScript).not.toContain("Contents/MacOS/node");
+    expect(copyScript).not.toContain("src-tauri/binaries");
   });
 
   it("packages Hatch under com.hatch.app", async () => {
@@ -138,7 +146,7 @@ describe("distribution config", () => {
 
     expect(config).toContain("resources/**/*");
     expect(prepare).toContain("extensions-template");
-    expect(prepare).toContain("babymenu-env.d.ts");
+    expect(prepare).toContain("hatch-env.d.ts");
     expect(prepare).toContain("hello-world");
     expect(prepare).toContain("assets/tray");
     expect(config).toContain('"hardenedRuntime": true');
@@ -163,9 +171,9 @@ describe("distribution config", () => {
     await expect(stat(resolve(import.meta.dirname, "../assets/app-icon.icns")).then((file) => file.isFile())).resolves.toBe(true);
     await expect(stat(resolve(import.meta.dirname, "../assets/hatch-app-icon.svg")).then((file) => file.isFile())).resolves.toBe(true);
     await expect(stat(resolve(import.meta.dirname, "../assets/hatch-app-icon.icns")).then((file) => file.isFile())).resolves.toBe(true);
-    const babyMenuIcon = await readFile(resolve(import.meta.dirname, "../assets/app-icon.icns"));
+    const defaultAppIcon = await readFile(resolve(import.meta.dirname, "../assets/app-icon.icns"));
     const hatchIcon = await readFile(resolve(import.meta.dirname, "../assets/hatch-app-icon.icns"));
-    expect(hatchIcon.equals(babyMenuIcon)).toBe(false);
+    expect(hatchIcon.equals(defaultAppIcon)).toBe(false);
     const hatchSvg = await readFile(resolve(import.meta.dirname, "../assets/hatch-app-icon.svg"), "utf8");
     expect(hatchSvg).not.toMatch(/#6AE3B6/i);
     expect(hatchSvg).not.toMatch(/mint/i);
@@ -183,16 +191,16 @@ describe("distribution config", () => {
     expect(workflow).toContain("googleapis/release-please-action@v4");
     expect(workflow).toContain("branches:");
     expect(workflow).toContain("- main");
-    expect(workflow).toContain("baby-menu-release-created: ${{ steps.release.outputs.release_created }}");
-    expect(workflow).toContain("baby-menu-tag-name: ${{ steps.release.outputs.tag_name }}");
-    expect(workflow).toContain("baby-menu-version: ${{ steps.release.outputs.version }}");
+    expect(workflow).toContain("hatch-release-created: ${{ steps.release.outputs.release_created }}");
+    expect(workflow).toContain("hatch-tag-name: ${{ steps.release.outputs.tag_name }}");
+    expect(workflow).toContain("hatch-version: ${{ steps.release.outputs.version }}");
     expect(workflow).toContain("github.event_name == 'workflow_dispatch'");
-    expect(workflow).toContain("needs.release-please.outputs.baby-menu-release-created == 'true'");
+    expect(workflow).toContain("needs.release-please.outputs.hatch-release-created == 'true'");
     expect(workflow).toContain("group: ${{ github.workflow }}-macos-${{ inputs.tag_name");
     expect(workflow).toContain("cancel-in-progress: false");
     expect(workflow).toContain("github.event_name == 'workflow_dispatch' && github.sha || format('refs/tags/{0}', env.TAG_NAME)");
     expect(workflow).toContain('if [ "$GITHUB_REF" != "refs/heads/main" ]');
-    expect(workflow).toContain('if [ "$TAG_NAME" != "baby-menu-v0.1.23" ] || [ "$VERSION" != "0.1.23" ]');
+    expect(workflow).toContain('if [ "$TAG_NAME" != "hatch-v0.1.23" ] || [ "$VERSION" != "0.1.23" ]');
     expect(workflow).toContain('ACTUAL_COMMIT="$(git rev-parse HEAD)"');
     expect(workflow).toContain('if [ "$ACTUAL_COMMIT" != "$GITHUB_SHA" ]');
     expect(workflow).toContain('PACKAGE_VERSION="$(node -p "require(\'./package.json\').version")"');
@@ -253,7 +261,7 @@ describe("distribution config", () => {
     expect(workflow).toContain('node scripts/e2e-packaged-mac-app.mjs "$APP_PATH"');
     expect(packagedRuntimeE2e).toContain("assertNoPackagedEsbuild");
     expect(packagedRuntimeE2e).toContain("assertNoPackagedEsbuild");
-    expect(packagedRuntimeE2e).toContain("window.babyMenu.agent.send");
+    expect(packagedRuntimeE2e).toContain("window.hatch.agent.send");
     expect(packagedRuntimeE2e).toContain("agent:prompt:done");
     expect(workflow).toContain("CFBundleShortVersionString");
     expect(workflow).toContain('lipo "$APP_EXECUTABLE" -verify_arch arm64 x86_64');
@@ -304,8 +312,8 @@ describe("distribution config", () => {
     expect(workflow).toContain('nohup", args: ["/bin/sh", "-c"');
     expect(workflow).toContain('while [ -e "#{appdir}/Hatch.app" ]; do');
     expect(workflow).toContain('/usr/bin/open -a "#{appdir}/Hatch.app"');
-    expect(workflow).not.toContain("baby-menu.relaunch");
-    expect(workflow).not.toContain("/tmp/com.kunchenguid.baby-menu");
+    expect(workflow).not.toContain("hatch.relaunch");
+    expect(workflow).not.toContain("/tmp/com.kunchenguid.hatch");
     expect(workflow).not.toContain("tags:");
     await expect(stat(resolve(import.meta.dirname, "../.github/workflows/release.yml"))).rejects.toMatchObject({
       code: "ENOENT",
@@ -326,7 +334,7 @@ describe("distribution config", () => {
       env: {
         ...process.env,
         SHA256: "abc123",
-        TAG_NAME: "baby-menu-v1.2.3",
+        TAG_NAME: "hatch-v1.2.3",
         VERSION: "1.2.3",
       },
     });
