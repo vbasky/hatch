@@ -1,6 +1,6 @@
 mod geometry;
+mod host;
 mod protocol;
-mod sidecar;
 mod tray;
 mod ui_server;
 
@@ -12,7 +12,6 @@ use geometry::{
   calculate_popover_bounds, responsive_popover_size, to_logical, Rect, Size, DEFAULT_HEIGHT, DEFAULT_WIDTH,
 };
 use serde_json::{json, Value};
-use sidecar::SidecarClient;
 use tray::hatch_tray_icon_path;
 use tauri::image::Image;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
@@ -22,8 +21,7 @@ use tauri::{
 use tauri_plugin_autostart::MacosLauncher;
 
 struct AppState {
-  sidecar: SidecarClient,
-  _child: Mutex<Option<tokio::process::Child>>,
+  host: host::Host,
   latest_tray: Mutex<Option<Rect>>,
   latest_size: Mutex<Size>,
   popover_visible: Mutex<bool>,
@@ -33,11 +31,11 @@ struct AppState {
 }
 
 fn keep_popover_open() -> bool {
-  matches!(std::env::var("BABY_MENU_KEEP_POPOVER_OPEN").as_deref(), Ok("1"))
+  matches!(std::env::var("HATCH_KEEP_POPOVER_OPEN").as_deref(), Ok("1"))
 }
 
 fn open_on_start() -> bool {
-  matches!(std::env::var("BABY_MENU_OPEN_POPOVER_ON_START").as_deref(), Ok("1"))
+  matches!(std::env::var("HATCH_OPEN_POPOVER_ON_START").as_deref(), Ok("1"))
 }
 
 fn repo_root() -> PathBuf {
@@ -181,7 +179,7 @@ fn emit_renderer_event(app: &AppHandle, channel: &str, payload: Value) {
   if let Some(window) = app.get_webview_window("popover") {
     let detail = json!({ "channel": channel, "payload": payload });
     let script = format!(
-      "try{{window.dispatchEvent(new CustomEvent('baby-menu-host-event',{{detail:{detail}}}));}}catch(_e){{}}"
+      "try{{window.dispatchEvent(new CustomEvent('hatch-host-event',{{detail:{detail}}}));}}catch(_e){{}}"
     );
     let _ = window.eval(&script);
   }
@@ -205,7 +203,7 @@ async fn toggle_popover(app: &AppHandle, tray: Rect) {
   if visible {
     let _ = window.hide();
     set_key_window_active(app, false);
-    emit_renderer_event(app, "baby-menu:popover:visibility", json!({ "visible": false }));
+    emit_renderer_event(app, "hatch:popover:visibility", json!({ "visible": false }));
     if let Some(state) = app.try_state::<AppState>() {
       *state.popover_visible.lock().unwrap() = false;
     }
@@ -225,10 +223,10 @@ async fn toggle_popover(app: &AppHandle, tray: Rect) {
   set_key_window_active(app, true);
   let _ = window.show();
   let _ = window.set_focus();
-  emit_renderer_event(app, "baby-menu:popover:visibility", json!({ "visible": true }));
+  emit_renderer_event(app, "hatch:popover:visibility", json!({ "visible": true }));
   if let Some(state) = app.try_state::<AppState>() {
     *state.popover_visible.lock().unwrap() = true;
-    let _ = state.sidecar.invoke("baby-menu:internal:popover-open".into(), vec![]).await;
+    let _ = state.host.invoke("hatch:internal:popover-open", &[]);
   }
 }
 
@@ -246,21 +244,21 @@ async fn host_invoke(app: AppHandle, channel: String, args: Option<Vec<Value>>) 
 }
 
 pub(crate) async fn dispatch_host_invoke(app: &AppHandle, channel: String, args: Vec<Value>) -> Result<Value, String> {
-  if channel == "baby-menu:app:quit" {
+  if channel == "hatch:app:quit" {
     app.exit(0);
     return Ok(json!({ "ok": true }));
   }
-  if channel == "baby-menu:popover:get-visibility" {
+  if channel == "hatch:popover:get-visibility" {
     let visible = app
       .get_webview_window("popover")
       .and_then(|window| window.is_visible().ok())
       .unwrap_or(false);
     return Ok(json!({ "visible": visible }));
   }
-  if channel == "baby-menu:popover:set-content-size" || channel == "baby-menu:popover:set-content-height" {
+  if channel == "hatch:popover:set-content-size" || channel == "hatch:popover:set-content-height" {
     let state = app.state::<AppState>();
     let mut size = *state.latest_size.lock().unwrap();
-    if channel == "baby-menu:popover:set-content-height" {
+    if channel == "hatch:popover:set-content-height" {
       size.height = args.first().and_then(Value::as_f64).unwrap_or(size.height);
     } else if let Some(object) = args.first() {
       size.width = object.get("width").and_then(Value::as_f64).unwrap_or(size.width);
@@ -277,10 +275,26 @@ pub(crate) async fn dispatch_host_invoke(app: &AppHandle, channel: String, args:
   }
 
   let state = app.state::<AppState>();
-  let result = state.sidecar.invoke(channel.clone(), args).await?;
-  if channel == "baby-menu:settings:set-open-at-login" {
+  let host = state.host.clone();
+  let invoke_channel = channel.clone();
+  let invoke_args = args.clone();
+  let app_handle = app.clone();
+  let result = tokio::task::spawn_blocking(move || {
+    host.invoke_emit(&invoke_channel, &invoke_args, &|channel, payload| {
+      emit_renderer_event(&app_handle, channel, payload);
+    })
+  })
+  .await
+  .map_err(|error| error.to_string())??;
+  if channel == "hatch:settings:set-open-at-login" {
     if let Some(open) = result.get("openAtLogin").and_then(Value::as_bool) {
       apply_autostart(&app, open);
+    }
+  }
+  if channel == "hatch:app:open-release-page" {
+    if let Some(url) = result.get("url").and_then(Value::as_str) {
+      use tauri_plugin_opener::OpenerExt;
+      let _ = app.opener().open_url(url, None::<&str>);
     }
   }
   Ok(result)
@@ -304,7 +318,7 @@ pub fn run() {
     .plugin(tauri_plugin_opener::init())
     .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
     .invoke_handler(tauri::generate_handler![host_invoke])
-    .register_asynchronous_uri_scheme_protocol("baby-menu-widget", |ctx, request, responder| {
+    .register_asynchronous_uri_scheme_protocol("hatch-widget", |ctx, request, responder| {
       let cache = ctx
         .app_handle()
         .try_state::<AppState>()
@@ -319,14 +333,14 @@ pub fn run() {
         Err(_) => responder.respond(tauri::http::Response::builder().status(400).body(Vec::new()).unwrap()),
       }
     })
-    .register_asynchronous_uri_scheme_protocol("baby-menu-host", |_ctx, request, responder| {
+    .register_asynchronous_uri_scheme_protocol("hatch-host", |_ctx, request, responder| {
       let url = request.uri().to_string();
       match protocol::host_protocol_module_source(&url) {
         Ok(source) => responder.respond(respond_protocol(source.into_bytes(), "text/javascript; charset=utf-8")),
         Err(_) => responder.respond(tauri::http::Response::builder().status(404).body(Vec::new()).unwrap()),
       }
     })
-    .register_asynchronous_uri_scheme_protocol("baby-menu-ui", |ctx, request, responder| {
+    .register_asynchronous_uri_scheme_protocol("hatch-ui", |ctx, request, responder| {
       let root = ctx
         .app_handle()
         .try_state::<AppState>()
@@ -346,44 +360,22 @@ pub fn run() {
       app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
       let packaged = !cfg!(debug_assertions);
-      let product_name = app.config().product_name.clone().unwrap_or_else(|| "Hatch".into());
-      let version = app.package_info().version.to_string();
-      let (node, host_js, host_root, resources) = node_and_host(app.handle(), packaged)?;
+      let (_node, _host_js, host_root, resources) = node_and_host(app.handle(), packaged)?;
       let cache_dir = widget_cache_dir(packaged, &host_root);
-
-      let handle = app.handle().clone();
-      let (client, child) = tauri::async_runtime::block_on(sidecar::spawn_sidecar(
-        node,
-        host_js,
-        host_root,
-        resources,
-        version,
-        product_name,
+      let native_host = host::Host::start(host::HostOptions {
+        root: host_root.clone(),
         packaged,
-        move |channel, payload| {
-          if channel == "baby-menu:native-notify" {
-            let title = payload.get("title").and_then(Value::as_str).unwrap_or("Baby Menu");
-            let body = payload.get("body").and_then(Value::as_str).unwrap_or("");
-            let _ = tauri_plugin_notification::NotificationExt::notification(&handle)
-              .builder()
-              .title(title)
-              .body(body)
-              .show();
-            return;
-          }
-          if channel == "baby-menu:app-quit" {
-            handle.exit(0);
-            return;
-          }
-          if channel == "baby-menu:set-open-at-login" {
-            if let Some(open) = payload.get("openAtLogin").and_then(Value::as_bool) {
-              apply_autostart(&handle, open);
-            }
-            return;
-          }
-          emit_renderer_event(&handle, &channel, payload);
-        },
-      ))
+        extensions_dir: Some(if packaged {
+          host_root.join("extensions")
+        } else {
+          repo_root().join("extensions")
+        }),
+        recipes_dir: None,
+        widget_cache_dir: cache_dir.clone(),
+        database_path: host_root.join("hatch.db"),
+        template_dir: resources.as_ref().map(|dir| dir.join("extensions-template")),
+        adapter_dir: resources.as_ref().map(|dir| dir.join("adapters")),
+      })
       .map_err(|error| Box::new(std::io::Error::other(error)) as Box<dyn std::error::Error>)?;
 
       let ui_root = if packaged {
@@ -395,8 +387,7 @@ pub fn run() {
         repo_root().join("out/renderer")
       };
       app.manage(AppState {
-        sidecar: client,
-        _child: Mutex::new(Some(child)),
+        host: native_host,
         latest_tray: Mutex::new(None),
         latest_size: Mutex::new(Size {
           width: DEFAULT_WIDTH,
@@ -433,7 +424,7 @@ pub fn run() {
         WebviewUrl::External(ui_url.parse().expect("ui url"))
       };
       WebviewWindowBuilder::new(app, "popover", url)
-        .title("baby-menu")
+        .title("Hatch")
         .inner_size(DEFAULT_WIDTH, DEFAULT_HEIGHT)
         .decorations(false)
         .resizable(false)
@@ -458,7 +449,7 @@ pub fn run() {
               let _ = window.hide();
             }
             set_key_window_active(&handle, false);
-            emit_renderer_event(&handle, "baby-menu:popover:visibility", json!({ "visible": false }));
+            emit_renderer_event(&handle, "hatch:popover:visibility", json!({ "visible": false }));
           }
         });
       }
@@ -518,5 +509,5 @@ pub fn run() {
       Ok(())
     })
     .run(tauri::generate_context!())
-    .expect("baby-menu tauri host failed");
+    .expect("hatch tauri host failed");
 }

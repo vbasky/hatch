@@ -27,7 +27,6 @@
       "../assets/hatch-app-icon.icns"
     ],
     "resources": ["resources/**/*"],
-    "externalBin": ["binaries/node"],
     "macOS": {
       "entitlements": "../assets/entitlements.mac.plist",
       "hardenedRuntime": true,

@@ -1,7 +1,7 @@
 use std::path::{Path, PathBuf};
 
-const WIDGET_SCHEME: &str = "baby-menu-widget";
-const HOST_SCHEME: &str = "baby-menu-host";
+const WIDGET_SCHEME: &str = "hatch-widget";
+const HOST_SCHEME: &str = "hatch-host";
 pub const COMPILED_WIDGET_HTTP_PREFIX: &str = "/__widgets__";
 pub const COMPILED_HOST_HTTP_PREFIX: &str = "/__host__";
 
@@ -112,7 +112,7 @@ pub fn host_protocol_module_source(raw_url: &str) -> Result<String, String> {
         .map(|name| format!("export const {name} = ui.{name};"))
         .collect::<Vec<_>>()
         .join("\n");
-      Ok(format!("const ui = window.__BABY_MENU_WIDGET_HOST__.ui;\n{reexports}\n"))
+      Ok(format!("const ui = window.__HATCH_WIDGET_HOST__.ui;\n{reexports}\n"))
     }
     _ => Err("Unknown host module URL".into()),
   }
@@ -145,7 +145,7 @@ pub fn content_type_for(path: &Path) -> &'static str {
   }
 }
 
-const REACT_SHIM: &str = r#"const React = window.__BABY_MENU_WIDGET_HOST__.React;
+const REACT_SHIM: &str = r#"const React = window.__HATCH_WIDGET_HOST__.React;
 export const Children = React.Children;
 export const Component = React.Component;
 export const Fragment = React.Fragment;
@@ -186,7 +186,7 @@ export const version = React.version;
 export default React;
 "#;
 
-const JSX_SHIM: &str = r#"const runtime = window.__BABY_MENU_WIDGET_HOST__.jsxRuntime;
+const JSX_SHIM: &str = r#"const runtime = window.__HATCH_WIDGET_HOST__.jsxRuntime;
 export const jsx = runtime.jsx;
 export const jsxs = runtime.jsxs;
 export const Fragment = runtime.Fragment;
