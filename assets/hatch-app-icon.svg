@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" fill="#F4F4F4" />
+  <ellipse cx="512" cy="528" rx="276" ry="318" fill="#0B0B0C" />
+  <path
+    fill="none"
+    stroke="#F4F4F4"
+    stroke-width="36"
+    stroke-linejoin="miter"
+    stroke-linecap="butt"
+    d="M481 184 L553 328 L461 471 L543 614 L471 758 L522 880"
+  />
+</svg>

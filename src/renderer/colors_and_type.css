@@ -1,0 +1,283 @@
+@charset "UTF-8";
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/JetBrainsMono-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/JetBrainsMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/JetBrainsMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("./fonts/JetBrainsMono-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg-void: #060607;
+  --bg-stage: #0B0B0C;
+  --bg-surface: #101012;
+  --bg-elevated: #16161A;
+  --bg-pressed: #1C1C21;
+
+  --ink-100: rgba(255, 255, 255, 0.96);
+  --ink-200: rgba(255, 255, 255, 0.86);
+  --ink-300: rgba(255, 255, 255, 0.65);
+  --ink-400: rgba(255, 255, 255, 0.48);
+  --ink-500: rgba(255, 255, 255, 0.34);
+  --ink-600: rgba(255, 255, 255, 0.22);
+  --ink-700: rgba(255, 255, 255, 0.12);
+  --ink-800: rgba(255, 255, 255, 0.07);
+  --ink-900: rgba(255, 255, 255, 0.04);
+
+  --signal-live: #6AE3B6;
+  --signal-live-glow: 0 0 6px rgba(106, 227, 182, 0.65);
+  --signal-pending: #FFD86B;
+  --signal-pending-glow: 0 0 6px rgba(255, 216, 107, 0.55);
+  --signal-error: #FF6A7A;
+  --signal-error-glow: 0 0 6px rgba(255, 106, 122, 0.55);
+
+  --signal-live-tint: rgba(106, 227, 182, 0.10);
+  --signal-pending-tint: rgba(255, 216, 107, 0.10);
+  --signal-error-tint: rgba(255, 106, 122, 0.10);
+
+  --bg: var(--bg-stage);
+  --bg-card: var(--bg-surface);
+  --bg-input: var(--bg-elevated);
+
+  --ink: var(--ink-200);
+  --ink-strong: var(--ink-100);
+  --ink-muted: var(--ink-300);
+  --ink-soft: var(--ink-400);
+  --ink-label: var(--ink-500);
+  --ink-faint: var(--ink-600);
+
+  --line: var(--ink-700);
+  --line-faint: var(--ink-800);
+
+  --signal: var(--signal-live);
+  --signal-glow: var(--signal-live-glow);
+  --signal-warn: var(--signal-pending);
+  --signal-danger: var(--signal-error);
+
+  --focus-ring: 0 0 0 1px rgba(106, 227, 182, 0.5),
+    0 0 0 4px rgba(106, 227, 182, 0.18);
+
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo,
+    "Cascadia Mono", Consolas, monospace;
+  --font-prose: "Inter Tight", -apple-system, BlinkMacSystemFont,
+    "SF Pro Text", "Segoe UI", sans-serif;
+
+  --fs-xxs: 0.6875rem;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.8125rem;
+  --fs-base: 0.875rem;
+  --fs-md: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: 1.75rem;
+  --fs-3xl: 2.25rem;
+
+  --lh-tight: 1;
+  --lh-snug: 1.2;
+  --lh-body: 1.45;
+
+  --tracking-value: -0.04em;
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-caps: 0.18em;
+  --tracking-foot: 0.20em;
+
+  --weight-light: 300;
+  --weight-reg: 400;
+  --weight-med: 500;
+  --weight-semi: 600;
+
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 20px;
+  --space-8: 24px;
+  --space-9: 32px;
+
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-pill: 999px;
+
+  --shadow-pop: 0 24px 80px rgba(0, 0, 0, 0.65),
+    0 0 0 0.5px rgba(255, 255, 255, 0.04);
+  --shadow-inset: inset 0 0.5px 0 rgba(255, 255, 255, 0.06);
+
+  --motion-fast: 80ms;
+  --motion-base: 160ms;
+  --motion-slow: 280ms;
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-base);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "tnum", "calt";
+}
+
+h1,
+h2,
+h3,
+h4 {
+  margin: 0;
+  color: var(--ink-strong);
+  line-height: var(--lh-tight);
+  font-family: var(--font-mono);
+  font-weight: var(--weight-med);
+  letter-spacing: var(--tracking-tight);
+}
+
+h1 {
+  font-size: var(--fs-base);
+  font-weight: var(--weight-med);
+}
+
+h2,
+h3 {
+  font-size: var(--fs-sm);
+  font-weight: var(--weight-med);
+}
+
+p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+  text-wrap: pretty;
+}
+
+code,
+pre {
+  font-family: var(--font-mono);
+  font-size: 1em;
+  color: var(--ink-strong);
+}
+
+kbd {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  padding: 1px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-elevated);
+  color: var(--ink-muted);
+  border: 1px solid var(--line);
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xxs);
+  font-weight: var(--weight-reg);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--ink-label);
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xxs);
+  font-weight: var(--weight-reg);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.status::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.status.warn {
+  color: var(--signal-warn);
+}
+
+.status.danger {
+  color: var(--signal-danger);
+}
+
+.status.muted {
+  color: var(--ink-soft);
+}
+
+.status.muted::before {
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-light);
+  letter-spacing: var(--tracking-value);
+  color: var(--ink-strong);
+  line-height: var(--lh-tight);
+  font-feature-settings: "tnum";
+}
+
+.value small {
+  font-size: 0.42em;
+  font-weight: var(--weight-reg);
+  letter-spacing: 0;
+  color: var(--ink-soft);
+  margin-left: 2px;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+::selection {
+  background: rgba(106, 227, 182, 0.25);
+  color: var(--ink-strong);
+}
+
+.prose,
+.prose p,
+.prose li {
+  font-family: var(--font-prose);
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}

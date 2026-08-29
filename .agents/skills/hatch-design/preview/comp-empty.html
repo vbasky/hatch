@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Starter state</title>
+<link rel="stylesheet" href="card.css">
+<style>
+  .empty {
+    background: var(--bg-card);
+    border: 1px dashed var(--line-faint);
+    border-radius: var(--radius-md);
+    padding: 18px 20px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .empty .top { font-size: 12px; color: var(--ink-200); }
+  .empty p {
+    color: var(--ink-soft);
+    font-size: 12px;
+    max-width: 42ch;
+    margin: 0;
+  }
+  .empty .ex { font-family: var(--font-mono); font-size: 11px; color: var(--ink-muted); }
+</style>
+</head>
+<body>
+<div class="card">
+  <span class="label">starter state · getting started · no illustration</span>
+  <div class="empty">
+    <span class="top">hello world</span>
+    <p>tell baby menu what you would like it to become</p>
+    <span class="ex">try: <span style="color:var(--ink-strong)">weekly claude code quota</span> · <span style="color:var(--ink-strong)">cpu and memory usage %</span></span>
+  </div>
+</div>
+</body>
+</html>

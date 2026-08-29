@@ -1,0 +1,10 @@
+{
+  "productName": "Hatch",
+  "identifier": "com.hatch.app",
+  "bundle": {
+    "icon": ["../assets/hatch-app-icon.icns"],
+    "macOS": {
+      "signingIdentity": "-"
+    }
+  }
+}
