@@ -83,7 +83,7 @@ The personality is "competent log". A calm CLI tool that happens to have a face.
 - `Added the cpu extension`
 - `keep it, or undo`
 - `Finish this change first`
-- `talk to the baby`
+- `talk to hatch`
 - `last sync 12:04`
 - `claude · weekly`
 - `designing the widget`
@@ -103,7 +103,7 @@ The personality is "competent log". A calm CLI tool that happens to have a face.
 - Wordmark: `baby_menu` (lowercase, underscore).
 - Module / widget keys: ALL CAPS, tracked `0.18em`. `CLAUDE · WEEKLY`, `CPU`, `NOW PLAYING`.
 - Button labels: Sentence case, no period. `Keep`, `Undo`, `Dismiss`. Special-case: tiny labels like `send` stay lowercase as a typographic detail (it reads as a command, not a button).
-- Placeholders: lowercase imperative, no period, no `...` ellipsis. `talk to the baby`.
+- Placeholders: lowercase imperative, no period, no `...` ellipsis. `talk to hatch`.
 - Error states: declarative, no exclamation. `Finish this change first.` `Refresh timed out.`
 - The word "agent" stays lowercase except at the start of a sentence.
 

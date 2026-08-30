@@ -82,14 +82,14 @@ describe("AgentChat", () => {
     installHatchAgentMock();
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "add a CPU temperature widget" } });
     fireEvent.submit(composer.closest("form")!);
 
     expect(await screen.findByText("› add a CPU temperature widget")).toBeTruthy();
     expect(screen.getByText("Working...")).toBeTruthy();
     expect(screen.queryByPlaceholderText("agent working")).toBeNull();
-    expect(screen.queryByPlaceholderText("talk to the baby")).toBeNull();
+    expect(screen.queryByPlaceholderText("talk to hatch")).toBeNull();
     expect(screen.queryByRole("button", { name: "send" })).toBeNull();
   });
 
@@ -97,7 +97,7 @@ describe("AgentChat", () => {
     const agent = installHatchAgentMock();
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "summarize my pull requests" } });
     fireEvent.submit(composer.closest("form")!);
 
@@ -154,7 +154,7 @@ describe("AgentChat", () => {
     });
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "add a widget" } });
     fireEvent.submit(composer.closest("form")!);
 
@@ -179,7 +179,7 @@ describe("AgentChat", () => {
     });
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "update the battery widget" } });
     fireEvent.submit(composer.closest("form")!);
 
@@ -206,7 +206,7 @@ describe("AgentChat", () => {
     }));
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "make the battery widget bigger" } });
     fireEvent.submit(composer.closest("form")!);
 
@@ -229,7 +229,7 @@ describe("AgentChat", () => {
     }));
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "add a bit more margin between the two columns" } });
     fireEvent.submit(composer.closest("form")!);
 
@@ -244,7 +244,7 @@ describe("AgentChat", () => {
     }));
     render(<AgentChat />);
 
-    const composer = screen.getByPlaceholderText("talk to the baby");
+    const composer = screen.getByPlaceholderText("talk to hatch");
     fireEvent.change(composer, { target: { value: "add a bit more margin between the two columns" } });
     fireEvent.submit(composer.closest("form")!);
 
@@ -274,7 +274,7 @@ describe("AgentChat", () => {
     expect(screen.queryByRole("button", { name: "Undo" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Dismiss" })).toBeNull();
     expect(screen.queryByText(/Kept/)).toBeNull();
-    expect(screen.getByPlaceholderText("talk to the baby")).toBeTruthy();
+    expect(screen.getByPlaceholderText("talk to hatch")).toBeTruthy();
   });
 
   it("does not show a prompt when no change session is open on mount", async () => {
@@ -287,7 +287,7 @@ describe("AgentChat", () => {
     });
 
     expect(screen.queryByRole("button", { name: "Keep" })).toBeNull();
-    expect(screen.getByPlaceholderText("talk to the baby")).toBeTruthy();
+    expect(screen.getByPlaceholderText("talk to hatch")).toBeTruthy();
     void agent;
   });
 });

@@ -95,7 +95,7 @@ describe("Monochrome Lab renderer", () => {
     expect(
       screen.getByText((_, element) => element?.classList.contains("mark") === true && element.textContent === "hatch"),
     ).toBeTruthy();
-    expect(screen.getByPlaceholderText("talk to the baby")).toBeTruthy();
+    expect(screen.getByPlaceholderText("talk to hatch")).toBeTruthy();
     expect(screen.queryByLabelText("Agent chat")).toBeNull();
     expect(screen.queryByText("dev-mode menu bar")).toBeNull();
     expect(screen.queryByText("live repo")).toBeNull();
@@ -119,7 +119,7 @@ describe("Monochrome Lab renderer", () => {
 
     render(<App />);
 
-    fireEvent.change(screen.getByPlaceholderText("talk to the baby"), {
+    fireEvent.change(screen.getByPlaceholderText("talk to hatch"), {
       target: { value: "add a cpu temperature widget" },
     });
     fireEvent.click(screen.getByRole("button", { name: "send" }));
@@ -159,14 +159,14 @@ describe("Monochrome Lab renderer", () => {
 
     render(<App />);
 
-    fireEvent.change(screen.getByPlaceholderText("talk to the baby"), {
+    fireEvent.change(screen.getByPlaceholderText("talk to hatch"), {
       target: { value: "add a battery widget" },
     });
     fireEvent.click(screen.getByRole("button", { name: "send" }));
 
     await screen.findByText("Added the cpu-temp extension");
 
-    fireEvent.change(screen.getByPlaceholderText("talk to the baby"), {
+    fireEvent.change(screen.getByPlaceholderText("talk to hatch"), {
       target: { value: "add weather" },
     });
     fireEvent.click(screen.getByRole("button", { name: "send" }));
