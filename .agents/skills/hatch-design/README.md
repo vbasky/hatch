@@ -1,8 +1,8 @@
 # Hatch Design System
 
-A design system for **Hatch** — a macOS tray-bar app that lives behind a system menu-bar icon. Click the tray icon and a small dark popover falls from the menu bar. Inside the popover, an embedded agent can edit the active extension workspace at runtime to add widgets, and the user can interact with those widgets without ever leaving the menu surface.
+A design system for **Hatch** — a system-tray app (macOS menu bar, KDE/Plasma tray on Linux) that lives behind a tray icon. Click the tray icon and a small dark popover opens. Inside the popover, an embedded agent can edit the active extension workspace at runtime to add widgets, and the user can interact with those widgets without ever leaving the popover surface.
 
-The visual direction is **Monochrome Lab** — terminal-elegant, near-black, mono type, one mint signal color. The popover should read as a calm command-line surface that happens to live in the macOS menu bar.
+The visual direction is **Monochrome Lab** — terminal-elegant, near-black, mono type, one mint signal color. The popover should read as a calm command-line surface that happens to live in the system tray.
 
 ---
 
@@ -131,7 +131,7 @@ The user should be able to read a real-change summary and immediately know wheth
 
 ## Visual foundations
 
-Everything in the system aims for one feeling: **a calm command-line surface that happens to live in the macOS menu bar.** Not a web app, not a chat, not a dashboard.
+Everything in the system aims for one feeling: **a calm command-line surface that happens to live in the system tray.** Not a web app, not a chat, not a dashboard.
 
 ### Color
 

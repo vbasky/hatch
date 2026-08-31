@@ -6,7 +6,7 @@
    Terminal-elegant. Near-black canvas, white type at varying alphas,
    one mint signal color, mono type everywhere. Hairlines, dashed
    dividers, blinking caret. Reads as a calm command-line surface
-   that happens to live in the macOS menu bar.
+   that happens to live in the system tray.
 
    Use the *role* tokens (--bg, --ink, --signal) in component code.
    Raw tokens at the top are the source of truth.

@@ -48,6 +48,25 @@ Single test: `pnpm vitest run tests/<name>.test.ts` or `pnpm vitest run -t "<pat
 - `esbuild` is build-time-only and must stay out of packaged bundles. It enters the production dependency graph only through `acpx -> tsx -> esbuild`, but Hatch imports the separately published `acpx/runtime` entry, which does not reference `tsx` or acpx's CLI chunk. The adapters are pre-bundled before packaging, while runtime extension compilation uses the shipped `typescript` dependency. `tests/acpx-runtime-dependencies.test.ts` locks the acpx entry-point boundary, and the packaged runtime E2E verifies a real ACP turn with neither `esbuild` nor `@esbuild` present in the app.
 - Keep `pnpm-lock.yaml` in sync with dependency changes so pnpm-deduped packages are included correctly in packaged builds.
 
+## Linux
+
+Hatch is a Tauri 2 app, so the same codebase builds for Linux as a system-tray application (tested against KDE/Plasma). The tray interaction differs from macOS: Linux StatusNotifier tray icons cannot report clicks, so the popover is toggled from the tray context menu (Toggle Hatch / Quit) and is positioned at the cursor. The tray icon is a full-color PNG (`assets/tray/hatch.png`) rather than a macOS template image.
+
+Build the Linux bundles:
+
+```sh
+# Install Tauri Linux system dependencies first, e.g. on Debian/Ubuntu:
+# sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf \
+#   libgtk-3-dev libayatana-appindicator3-dev
+pnpm install
+node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
+pnpm exec tauri build --bundles deb,rpm,appimage
+```
+
+Artifacts land in `src-tauri/target/release/bundle/`. On Wayland, positioning the popover at the cursor is limited by the compositor; X11 supports it fully.
+
+> Note: Linux packages are not yet published in CI. The release workflow currently builds macOS only, and there is no AUR package yet.
+
 ## Hero video
 
 The README hero animation is committed from `marketing-video/hatch-marketing-square.gif`.

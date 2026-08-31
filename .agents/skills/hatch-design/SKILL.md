@@ -23,7 +23,7 @@ If the user invokes this skill without any other guidance, ask them what they wa
 
 ## Hard rules
 
-1. Hatch is a **macOS tray popover**, 504px wide by default and adaptive in both width and height when a root `layout.tsx` defines a wider canvas. Never design for a full browser window.
+1. Hatch is a **system-tray popover**, 504px wide by default and adaptive in both width and height when a root `layout.tsx` defines a wider canvas. Never design for a full browser window.
 2. **The agent's work is not a chat.** No transcript, no bubbles, no history. Use the `RunStrip` pattern: one live affordance (pulsing mint dot + current step + timer), replaced by a `SessionBar` when done.
 3. **No build-mode toggle.** On the main idle surface, the composer is one slim row pinned to the bottom of the popover. It auto-grows to a second line when the user types more. During an active agent run, `RunStrip` replaces the composer; the settings view also replaces it while open.
 4. **Never expose git, files, or commits to the user.** The SessionBar reads "Added the cpu extension" or "Updated the layout", not "3 files committed · b8d3a2c". Buttons are **Keep** and **Undo**, not Save and Rollback, and Keep clears the bar without a redundant kept confirmation.

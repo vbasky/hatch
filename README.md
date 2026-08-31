@@ -34,11 +34,24 @@ You ask for a feature in plain English, the agent writes an extension and it hot
 
 ## Quick Start
 
+### macOS
+
 Requires macOS 13 Ventura or newer, Homebrew, and a supported, already-authenticated agent CLI such as `claude` or `codex` on `PATH`.
 
 ```sh
 brew install --cask vbasky/tap/hatch
 open -a "Hatch"
+```
+
+### Linux
+
+Hatch runs as a KDE/Plasma system-tray app. Builds are produced for `deb`, `rpm`, and AppImage; see [docs/development.md](docs/development.md#linux) for how to build and install from source until Linux packages are published.
+
+Requires a supported, already-authenticated agent CLI such as `claude` or `codex` on `PATH`.
+
+```sh
+# From an AppImage build:
+./hatch_<version>_amd64.AppImage
 ```
 
 Click the tray icon, then ask for a widget in the composer such as:
@@ -74,7 +87,7 @@ For agent selection, custom ACP agents, telemetry, and environment flags, see [d
 
 ```
    ┌─────────────────────┐
-   │  macOS tray popover │   (React renderer, adaptive size)
+   │  system tray popover│   (React renderer, adaptive size)
    │ + Menu / Settings   │
    │ + Reload layout     │
    │ + Update / Quit     │
@@ -102,7 +115,7 @@ For agent selection, custom ACP agents, telemetry, and environment flags, see [d
    └─────────────────────┘
 ```
 
-- **Three processes, one bridge** - the renderer never touches git, the agent, or the filesystem; everything goes through `window.hatch`.
+- **Three processes, one bridge** - the renderer never touches git, the agent, or the filesystem; everything goes through `window.hatch`. (On Linux the tray interaction is a context menu — Toggle Hatch / Quit — since Linux tray icons cannot report clicks.)
 - **Recipes are specs, not prompts** - HTML files under `extensions/recipes/` describe a widget's capability and data sources; the agent reads the matching recipe before implementing.
   For live or system data, recipe guidance requires the agent to inspect the real source before parsing it and verify the finished widget against that same data before reporting done.
   The bundled quota recipes cover Claude Code, Codex, Cursor, GitHub Copilot, and Grok.
