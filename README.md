@@ -1,3 +1,6 @@
+<p align="center">
+  <img alt="Hatch" src="assets/hatch-app-icon.svg" width="96" />
+</p>
 <h1 align="center">hatch</h1>
 <p align="center">
   <a href="https://github.com/vbasky/hatch/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/vbasky/hatch/ci.yml?style=flat-square&label=ci" /></a>
