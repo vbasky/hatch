@@ -275,7 +275,9 @@ describe("distribution config", () => {
     expect(workflow).toContain("version:");
 
     const recoveryTargetIndex = workflow.indexOf("Validate manual recovery target");
-    const checkoutIndex = workflow.indexOf("actions/checkout@v6");
+    // The linux job also uses actions/checkout@v6; the macOS job's checkout
+    // is the last one in the file.
+    const checkoutIndex = workflow.lastIndexOf("actions/checkout@v6");
     const recoverySourceIndex = workflow.indexOf("Verify manual recovery source");
     const credentialsIndex = workflow.indexOf("Restore App Store Connect API key");
     expect(recoveryTargetIndex).toBeGreaterThan(-1);
@@ -318,6 +320,26 @@ describe("distribution config", () => {
     await expect(stat(resolve(import.meta.dirname, "../.github/workflows/release.yml"))).rejects.toMatchObject({
       code: "ENOENT",
     });
+  });
+
+  it("builds and uploads Linux bundles, and publishes only after they are attached", async () => {
+    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release-please.yml"), "utf8");
+
+    expect(workflow).toContain("  linux:");
+    expect(workflow).toContain("needs: [release-please, linux]");
+    expect(workflow).toContain("libwebkit2gtk-4.1-dev");
+    expect(workflow).toContain("libayatana-appindicator3-dev");
+    expect(workflow).toContain("pnpm exec tauri build --bundles deb,rpm");
+    expect(workflow).toContain("gh release upload \"$TAG_NAME\" \"$artifact\" --clobber");
+    expect(workflow).toContain("No deb/rpm artifacts found");
+
+    // The linux job must run before the macos job publishes the release.
+    const linuxJobIndex = workflow.indexOf("  linux:");
+    const macosJobIndex = workflow.indexOf("  macos:");
+    const publishIndex = workflow.indexOf("Publish verified release");
+    expect(linuxJobIndex).toBeGreaterThan(-1);
+    expect(macosJobIndex).toBeGreaterThan(linuxJobIndex);
+    expect(publishIndex).toBeGreaterThan(linuxJobIndex);
   });
 
   it("generates a syntactically valid Homebrew relaunch shell script", async () => {

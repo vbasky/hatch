@@ -34,8 +34,78 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-  macos:
+  linux:
     needs: release-please
+    if: ${{ always() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.hatch-release-created == 'true') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    concurrency:
+      group: ${{ github.workflow }}-linux-${{ inputs.tag_name || needs.release-please.outputs.hatch-tag-name }}
+      cancel-in-progress: false
+    env:
+      TAG_NAME: ${{ inputs.tag_name || needs.release-please.outputs.hatch-tag-name }}
+      VERSION: ${{ inputs.version || needs.release-please.outputs.hatch-version }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install Tauri Linux system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.1.1
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build renderer and host
+        env:
+          HATCH_UMAMI_HOST: https://a.vbasky.com
+          HATCH_UMAMI_WEBSITE_ID: ${{ vars.HATCH_UMAMI_WEBSITE_ID }}
+        run: |
+          node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
+
+      - name: Build deb and rpm bundles
+        run: pnpm exec tauri build --bundles deb,rpm
+
+      - name: Upload Linux bundles to draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BUNDLE_DIR="src-tauri/target/release/bundle"
+          UPLOADED=0
+          while IFS= read -r -d '' artifact; do
+            case "$artifact" in
+              *.deb|*.rpm)
+                echo "Uploading $artifact"
+                gh release upload "$TAG_NAME" "$artifact" --clobber
+                UPLOADED=$((UPLOADED + 1))
+                ;;
+            esac
+          done < <(find "$BUNDLE_DIR" -type f \( -name '*.deb' -o -name '*.rpm' \) -print0)
+          if [ "$UPLOADED" -eq 0 ]; then
+            echo "No deb/rpm artifacts found under $BUNDLE_DIR" >&2
+            exit 1
+          fi
+
+  macos:
+    needs: [release-please, linux]
     if: ${{ always() && (github.event_name == 'workflow_dispatch' || needs.release-please.outputs.hatch-release-created == 'true') }}
     runs-on: macos-latest
     timeout-minutes: 75
@@ -568,6 +638,69 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Casks/hatch.rb
+          if ! git diff --cached --quiet; then
+            git commit -m "hatch ${VERSION}"
+            git push
+          fi
+
+      - name: Update AUR package
+        env:
+          AUR_SSH_KEY: ${{ secrets.AUR_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          : "${AUR_SSH_KEY:?Missing AUR_SSH_KEY}"
+          AUR_REPO="ssh://aur@aur.archlinux.org/hatch.git"
+          AUR_DIR="$RUNNER_TEMP/hatch-aur"
+
+          # Build the PKGBUILD for the new version. The source tarball
+          # checksum is verified by makepkg from the tagged archive.
+          cat > "$RUNNER_TEMP/PKGBUILD" << PKGBUILD_EOF
+          # Maintainer: vbasky <vbasky@users.noreply.github.com>
+          pkgname=hatch
+          pkgver=${VERSION}
+          pkgrel=1
+          pkgdesc="Menu-bar app that writes its own widgets (system tray popover for macOS and KDE/Plasma)"
+          arch=('x86_64' 'aarch64')
+          url="https://github.com/vbasky/hatch"
+          license=('MIT')
+          depends=(
+            'webkit2gtk-4.1'
+            'gtk3'
+            'libappindicator-gtk3'
+            'librsvg'
+            'patchelf'
+          )
+          makedepends=(
+            'nodejs'
+            'pnpm'
+            'rust'
+            'cargo'
+          )
+          source=("hatch-\${pkgver}.tar.gz::https://github.com/vbasky/hatch/archive/refs/tags/hatch-v\${pkgver}.tar.gz")
+          sha256sums=('SKIP')
+
+          build() {
+            cd "\$srcdir/hatch-\$pkgver"
+            pnpm install --frozen-lockfile
+            node scripts/build.mjs
+            node scripts/prepare-tauri-resources.mjs
+            pnpm exec tauri build --bundles app
+          }
+
+          package() {
+            cd "\$srcdir/hatch-\$pkgver"
+            install -Dm755 "src-tauri/target/release/hatch" "\$pkgdir/usr/bin/hatch"
+            install -Dm644 "assets/hatch-app-icon.svg" "\$pkgdir/usr/share/icons/hicolor/scalable/apps/hatch.svg"
+          }
+          PKGBUILD_EOF
+
+          export GIT_SSH_COMMAND="ssh -i <(printf '%s' \"$AUR_SSH_KEY\") -o StrictHostKeyChecking=accept-new"
+          git clone "$AUR_REPO" "$AUR_DIR"
+          cp "$RUNNER_TEMP/PKGBUILD" "$AUR_DIR/PKGBUILD"
+          cd "$AUR_DIR"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add PKGBUILD
           if ! git diff --cached --quiet; then
             git commit -m "hatch ${VERSION}"
             git push

@@ -45,13 +45,19 @@ open -a "Hatch"
 
 ### Linux
 
-Hatch runs as a KDE/Plasma system-tray app. Builds are produced for `deb`, `rpm`, and AppImage; see [docs/development.md](docs/development.md#linux) for how to build and install from source until Linux packages are published.
+Hatch runs as a KDE/Plasma system-tray app. Releases publish `deb` and `rpm` packages; Arch Linux users can install from the [AUR](https://aur.archlinux.org/packages/hatch) (or build from source — see [docs/development.md](docs/development.md#linux)).
 
 Requires a supported, already-authenticated agent CLI such as `claude` or `codex` on `PATH`.
 
 ```sh
-# From an AppImage build:
-./hatch_<version>_amd64.AppImage
+# Debian/Ubuntu:
+sudo apt install ./hatch_<version>_amd64.deb
+
+# Fedora/RHEL:
+sudo dnf install ./hatch-<version>-1.x86_64.rpm
+
+# Arch (AUR):
+yay -S hatch
 ```
 
 Click the tray icon, then ask for a widget in the composer such as:

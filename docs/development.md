@@ -60,12 +60,14 @@ Build the Linux bundles:
 #   libgtk-3-dev libayatana-appindicator3-dev
 pnpm install
 node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
-pnpm exec tauri build --bundles deb,rpm,appimage
+pnpm exec tauri build --bundles deb,rpm
 ```
 
 Artifacts land in `src-tauri/target/release/bundle/`. On Wayland, positioning the popover at the cursor is limited by the compositor; X11 supports it fully.
 
-> Note: Linux packages are not yet published in CI. The release workflow currently builds macOS only, and there is no AUR package yet.
+Arch Linux ships via the [AUR PKGBUILD](../aur/PKGBUILD), which builds the release from source against the system webkit2gtk/gtk3 (no bundled runtime). The release workflow builds `deb`/`rpm`, uploads them to the GitHub release, and updates the AUR package and Homebrew cask.
+
+> Note: Linux packages are built and published from the `release-please` workflow; there is no separate Linux CI job on pull requests beyond `cargo check` and the JS checks in `ci.yml`.
 
 ## Hero video
 
