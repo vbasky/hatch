@@ -67,7 +67,7 @@ Artifacts land in `src-tauri/target/release/bundle/`. On Wayland, positioning th
 
 Arch Linux ships via the [AUR PKGBUILD](../aur/PKGBUILD), which builds the release from source against the system webkit2gtk/gtk3 (no bundled runtime). The release workflow builds `deb`/`rpm`, uploads them to the GitHub release, and updates the AUR package and Homebrew cask.
 
-> Note: Linux packages are built and published from the `release-please` workflow; there is no separate Linux CI job on pull requests beyond `cargo check` and the JS checks in `ci.yml`.
+> Note: Linux packages are built and published from the `release.yml` workflow; there is no separate Linux CI job on pull requests beyond `cargo check` and the JS checks in `ci.yml`.
 
 ## Hero video
 

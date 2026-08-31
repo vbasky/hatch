@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 const execFileAsync = promisify(execFile);
 
 async function releaseDraftGuard(): Promise<string> {
-  const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release-please.yml"), "utf8");
+  const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release.yml"), "utf8");
   const match = workflow.match(/- name: Verify release is still draft\n[\s\S]*?        run: \|\n(?<script>(?: {10}.*\n)+)/);
   if (!match?.groups?.script) {
     throw new Error("Could not find the release draft guard in the release workflow");
@@ -182,7 +182,7 @@ describe("distribution config", () => {
   });
 
   it("signs, notarizes, and verifies the publication-ready DMG before publishing it", async () => {
-    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release-please.yml"), "utf8");
+    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release.yml"), "utf8");
     const packagedRuntimeE2e = await readFile(
       resolve(import.meta.dirname, "../scripts/e2e-packaged-mac-app.mjs"),
       "utf8",
@@ -317,13 +317,12 @@ describe("distribution config", () => {
     expect(workflow).not.toContain("hatch.relaunch");
     expect(workflow).not.toContain("/tmp/com.vbasky.hatch");
     expect(workflow).not.toContain("tags:");
-    await expect(stat(resolve(import.meta.dirname, "../.github/workflows/release.yml"))).rejects.toMatchObject({
-      code: "ENOENT",
-    });
+    // The release workflow is release.yml (release-please driven).
+    await expect(stat(resolve(import.meta.dirname, "../.github/workflows/release.yml"))).resolves.toBeDefined();
   });
 
   it("builds and uploads Linux bundles, and publishes only after they are attached", async () => {
-    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release-please.yml"), "utf8");
+    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release.yml"), "utf8");
 
     expect(workflow).toContain("  linux:");
     expect(workflow).toContain("needs: [release-please, linux]");
@@ -343,7 +342,7 @@ describe("distribution config", () => {
   });
 
   it("generates a syntactically valid Homebrew relaunch shell script", async () => {
-    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release-please.yml"), "utf8");
+    const workflow = await readFile(resolve(import.meta.dirname, "../.github/workflows/release.yml"), "utf8");
     const caskTemplateMatch = workflow.match(/cat > "\$RUNNER_TEMP\/homebrew-tap\/Casks\/hatch\.rb" << CASK_EOF\n(?<template>[\s\S]*?)\n\s+CASK_EOF/);
 
     expect(caskTemplateMatch?.groups?.template).toBeDefined();

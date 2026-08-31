@@ -64,7 +64,7 @@ function expectedReleaseOutputs(): string[] {
 
   let manifest = ".release-please-manifest.json";
   const releaseWorkflow = readFileSync(
-    join(workflowsDir, "release-please.yml"),
+    join(workflowsDir, "release.yml"),
     "utf8",
   );
   const manifestMatch = releaseWorkflow.match(/manifest-file:\s*(\S+)/);
@@ -290,7 +290,7 @@ describe("release-please CI exclusions", () => {
     // Representative human PRs always include at least one non-release path.
     expect(
       allPathsIgnored(ignore, [
-        ".github/workflows/release-please.yml",
+        ".github/workflows/release.yml",
         "tests/release-config.test.ts",
         "CONTRIBUTING.md",
       ]),
