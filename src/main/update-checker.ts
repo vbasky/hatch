@@ -4,7 +4,7 @@ import type { UpdateStatus } from "../shared/contracts";
 // so "is there a newer version" is answered by the public GitHub releases API.
 // There is no in-app auto-updater; the indicator just points the user at the
 // release page, which is where the cask upgrade instructions live.
-const DEFAULT_REPO = "kunchenguid/hatch";
+const DEFAULT_REPO = "vbasky/hatch";
 // Matches the cadence used elsewhere in Kun's apps: a check at most every 4 hours.
 const DEFAULT_INTERVAL_MS = 4 * 60 * 60 * 1000;
 

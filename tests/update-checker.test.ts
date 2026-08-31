@@ -23,17 +23,17 @@ describe("compareSemver", () => {
 describe("parseLatestRelease", () => {
   it("extracts the version (without v) and release page url", () => {
     expect(
-      parseLatestRelease({ tag_name: "v0.2.0", html_url: "https://github.com/kunchenguid/hatch/releases/tag/v0.2.0" }),
-    ).toEqual({ version: "0.2.0", url: "https://github.com/kunchenguid/hatch/releases/tag/v0.2.0" });
+      parseLatestRelease({ tag_name: "v0.2.0", html_url: "https://github.com/vbasky/hatch/releases/tag/v0.2.0" }),
+    ).toEqual({ version: "0.2.0", url: "https://github.com/vbasky/hatch/releases/tag/v0.2.0" });
   });
 
   it("extracts the version from component-prefixed release tags", () => {
     expect(
       parseLatestRelease({
         tag_name: "hatch-v0.2.0",
-        html_url: "https://github.com/kunchenguid/hatch/releases/tag/hatch-v0.2.0",
+        html_url: "https://github.com/vbasky/hatch/releases/tag/hatch-v0.2.0",
       }),
-    ).toEqual({ version: "0.2.0", url: "https://github.com/kunchenguid/hatch/releases/tag/hatch-v0.2.0" });
+    ).toEqual({ version: "0.2.0", url: "https://github.com/vbasky/hatch/releases/tag/hatch-v0.2.0" });
   });
 
   it("returns null when the payload has no usable tag", () => {
@@ -153,9 +153,9 @@ describe("createUpdateChecker", () => {
     const fetchImpl = vi.fn(async () => {
       throw new Error("offline");
     });
-    const checker = createUpdateChecker({ currentVersion: "0.1.0", repo: "kunchenguid/hatch", fetchImpl, now: () => 0, openExternal });
+    const checker = createUpdateChecker({ currentVersion: "0.1.0", repo: "vbasky/hatch", fetchImpl, now: () => 0, openExternal });
 
     await checker.openReleasePage();
-    expect(openExternal).toHaveBeenCalledWith("https://github.com/kunchenguid/hatch/releases/latest");
+    expect(openExternal).toHaveBeenCalledWith("https://github.com/vbasky/hatch/releases/latest");
   });
 });

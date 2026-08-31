@@ -230,6 +230,35 @@ async fn toggle_popover(app: &AppHandle, tray: Rect) {
   }
 }
 
+/// Toggle the popover anchored at the current cursor position.
+///
+/// On Linux the tray icon exposes no screen rect, so the popover is placed
+/// relative to the mouse cursor (clamped to the work area) instead.
+#[cfg(not(target_os = "macos"))]
+async fn toggle_at_cursor(app: &AppHandle) {
+  let Some(window) = app.get_webview_window("popover") else {
+    return;
+  };
+  let cursor = window.cursor_position().ok();
+  let tray = cursor
+    .map(|position| {
+      let scale = window.scale_factor().unwrap_or(1.0);
+      Rect {
+        x: position.x / scale - 11.0,
+        y: position.y / scale - 11.0,
+        width: 22.0,
+        height: 22.0,
+      }
+    })
+    .unwrap_or(Rect {
+      x: 0.0,
+      y: 0.0,
+      width: 22.0,
+      height: 22.0,
+    });
+  toggle_popover(app, tray).await;
+}
+
 fn respond_protocol(body: Vec<u8>, content_type: &str) -> tauri::http::Response<Vec<u8>> {
   tauri::http::Response::builder()
     .header("content-type", content_type)
@@ -466,10 +495,32 @@ pub fn run() {
       let icon_path = hatch_tray_icon_path(&assets_dir);
       let icon = Image::from_path(&icon_path).unwrap_or_else(|_| Image::new(&[], 0, 0));
       let tray_handle = app.handle().clone();
-      let tray_icon = TrayIconBuilder::new()
-        .icon(icon)
-        .icon_as_template(true)
-        .tooltip("Hatch")
+      let tray_builder = TrayIconBuilder::new().icon(icon).tooltip("Hatch");
+      #[cfg(target_os = "macos")]
+      let tray_builder = tray_builder.icon_as_template(true);
+      #[cfg(not(target_os = "macos"))]
+      let tray_builder = {
+        // Linux tray icons cannot report clicks and may not even render
+        // without a menu, so expose the popover through a context menu.
+        use tauri::menu::{Menu, MenuItem};
+        let toggle_item = MenuItem::with_id(app, "toggle", "Toggle Hatch", true, None::<&str>)?;
+        let quit_item = MenuItem::with_id(app, "quit", "Quit Hatch", true, None::<&str>)?;
+        let menu = Menu::with_items(app, &[&toggle_item, &quit_item])?;
+        tray_builder
+          .menu(&menu)
+          .show_menu_on_left_click(true)
+          .on_menu_event(|app, event| match event.id().as_ref() {
+            "toggle" => {
+              let handle = app.clone();
+              tauri::async_runtime::spawn(async move {
+                toggle_at_cursor(&handle).await;
+              });
+            }
+            "quit" => app.exit(0),
+            _ => {}
+          })
+      };
+      let tray_icon = tray_builder
         .on_tray_icon_event(move |_tray, event| {
           if let TrayIconEvent::Click {
             button: MouseButton::Left,

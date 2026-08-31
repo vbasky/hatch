@@ -42,7 +42,7 @@ Follow these rules:
 
 ## Architecture
 
-This is a macOS tray-bar Electron app whose distinguishing idea is that an embedded agent (running via `acpx/runtime`) edits the active extension workspace at runtime.
+This is a macOS tray-bar app (Tauri 2 shell, Rust host, React renderer) whose distinguishing idea is that an embedded agent (running via `acpx/runtime`) edits the active extension workspace at runtime.
 Tracked source extensions use git as the accept/rollback mechanism when selected explicitly; packaged mode edits `~/.hatch/extensions` and uses filesystem snapshots.
 
 Three processes, kept deliberately separate:
@@ -61,7 +61,7 @@ The extension-facing slice of that contract is a generated public surface, treat
 
 `src/main/` module index:
 
-- `app.ts` - Electron lifecycle, popover window creation, packaged path setup, extension seeding, preferences, selectable-agent catalog wiring, protocols, tray, and IPC. `package.json#main` points here via `out/main/index.js`.
+- `app.ts` - legacy host lifecycle, popover window creation, packaged path setup, extension seeding, preferences, selectable-agent catalog wiring, protocols, tray, and IPC. `package.json#main` points here via `out/main/index.js`.
 - `app-paths.ts` - resolves source paths versus packaged `~/.hatch` paths.
 - `tray.ts` - macOS tray icon and click handling (`createHatchTray`).
 - `popover.ts` - popover `BrowserWindow` options (`createPopoverOptions`), adaptive width/height sizing (`responsivePopoverSize`), bounds math (`calculatePopoverBounds`), and renderer URL/file loading (`loadPopoverRenderer`).
@@ -98,13 +98,9 @@ The Codex adapter makes one narrow exception: because `--ignore-user-config` als
 - `extension-modules.ts` - shared runtime loader for extension `widget.tsx` and root `layout.tsx` modules, including dynamic import and packaged-mode stylesheet injection for widgets, layouts, and settings sections.
 - `settings/settings-sections.ts` - extracts `HatchSettingsSection` exports from loaded extension modules and sorts them by extension id for stable Settings page order.
 
-### Electron build wiring
+### Build wiring
 
-`electron.vite.config.ts` has three roots:
-
-- `main` entry: `src/main/app.ts` -> `out/main/index.js` (this is `package.json#main`).
-- `preload` entry: `src/preload/index.ts` -> `out/preload/index.js`.
-- `renderer` root: `src/renderer/` -> `out/renderer/`. In dev, main loads `process.env.ELECTRON_RENDERER_URL`; in production it loads `out/renderer/index.html` via `loadFile`.
+The renderer is built with Vite (`vite.config.ts`): `src/renderer/` -> `out/renderer/`. In dev the Tauri window loads the Vite dev server; in production it loads `out/renderer/index.html` from the embedded UI server.
 
 `scripts/build-adapters.mjs` bundles `src/adapters/claude/index.ts` and `src/adapters/codex/index.ts` to `out/adapters/<name>/index.mjs` after `electron-vite build`.
 `pnpm dev` runs the same adapter build before launching Electron because dev runtime paths also resolve adapters from `out/adapters/`.
@@ -171,7 +167,7 @@ Do not write generated extension files, the local extension database, compiled m
 - That state is reset on code edits and app restarts; durable extension state belongs in the shared SQLite store, not module scope.
 - Use `viewRefreshIntervalMs` / `refreshView` for live data that only matters while the popover is visible, and use background tasks only for work that must keep running while the popover is closed.
 - Extension data that should persist locally belongs in the shared SQLite store, exposed as `context.db` server-side and `window.hatch.db` renderer-side; keep heavy queries out of widgets.
-- The embedded agent should be steered toward editing its active extension workspace. The Electron core in `src/main/`, `src/preload/`, and shared IPC wiring is meant to be boring infrastructure.
+- The embedded agent should be steered toward editing its active extension workspace. The host core in `src-tauri/src/host/` (with the legacy `src/main/` dev host, `src/preload/`, and shared IPC wiring) is meant to be boring infrastructure.
 
 ### Recipe authoring best practices
 

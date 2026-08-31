@@ -2,7 +2,7 @@
   "name": "hatch",
   "version": "0.1.24",
   "description": "Menu-bar app that writes its own widgets",
-  "author": "Kun Chen",
+  "author": "YOUR_NAME",
   "license": "MIT",
   "private": true,
   "type": "module",

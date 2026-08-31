@@ -3,7 +3,7 @@ use std::time::{Duration, Instant};
 
 use serde_json::{json, Value};
 
-const DEFAULT_REPO: &str = "kunchenguid/hatch";
+const DEFAULT_REPO: &str = "vbasky/hatch";
 const INTERVAL: Duration = Duration::from_secs(4 * 60 * 60);
 
 pub struct UpdateChecker {
@@ -45,7 +45,7 @@ impl UpdateChecker {
       .get("releaseUrl")
       .and_then(Value::as_str)
       .filter(|url| !url.is_empty())
-      .unwrap_or("https://github.com/kunchenguid/hatch/releases/latest")
+      .unwrap_or("https://github.com/vbasky/hatch/releases/latest")
       .to_string()
   }
 
@@ -90,7 +90,7 @@ impl UpdateChecker {
       "currentVersion": self.current_version,
       "latestVersion": latest,
       "updateAvailable": true,
-      "releaseUrl": "https://github.com/kunchenguid/hatch/releases/latest"
+      "releaseUrl": "https://github.com/vbasky/hatch/releases/latest"
     })
   }
 }

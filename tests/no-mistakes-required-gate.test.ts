@@ -5,7 +5,7 @@ import { parse } from "yaml";
 
 const ACTION_SHA = "32d396ac0f29135daf7fcb9964aba9d5f4e796d6";
 const ACTION =
-  `kunchenguid/no-mistakes/.github/actions/require-no-mistakes@${ACTION_SHA}`;
+  `vbasky/no-mistakes/.github/actions/require-no-mistakes@${ACTION_SHA}`;
 
 interface PullRequestTrigger {
   types: string[];

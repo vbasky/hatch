@@ -80,7 +80,7 @@ An unchanged `server.ts` module instance stays alive across invokes and backgrou
 | Path                        | What lives here                                                                        |
 | --------------------------- | -------------------------------------------------------------------------------------- |
 | `src/adapters/`             | Bundled clean-room ACP adapters for built-in Claude Code and Codex agents              |
-| `src/main/`                 | Electron lifecycle, tray, popover, IPC, git, agent runtime, update checks              |
+| `src/main/`                 | Legacy Node dev host (git, agent runtime, update checks) — superseded by the Rust host in `src-tauri/src/host/`, kept for dev mode |
 | `src/preload/index.ts`      | The stable `window.hatch` bridge                                                    |
 | `src/renderer/`             | React UI: `AgentChat`, `WidgetHost`, custom layouts, settings, updates, layout reloads, app controls |
 | `src/ui/`                   | Shared `@hatch/ui` design system for shell and extension renderer surfaces          |

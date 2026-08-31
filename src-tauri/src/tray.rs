@@ -4,11 +4,19 @@ use std::path::{Path, PathBuf};
 pub const TRAY_ICON_POINT_SIZE: f64 = 18.0;
 
 pub fn hatch_tray_icon_path(assets_dir: &Path) -> PathBuf {
-  let retina = assets_dir.join("tray/hatchTemplate@3x.png");
-  if retina.is_file() {
-    retina
-  } else {
+  #[cfg(target_os = "macos")]
+  {
+    let retina = assets_dir.join("tray/hatchTemplate@3x.png");
+    if retina.is_file() {
+      return retina;
+    }
     assets_dir.join("tray/hatchTemplate.png")
+  }
+  #[cfg(not(target_os = "macos"))]
+  {
+    // Linux/SNI tray icons are rendered as-is (no template treatment),
+    // so use a regular full-color PNG rather than the macOS template.
+    assets_dir.join("tray/hatch.png")
   }
 }
 

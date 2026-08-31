@@ -13,7 +13,7 @@ import {
 } from "../ui";
 import type { UpdateStatus } from "../shared/contracts";
 
-// hatch is delivered only through the Homebrew cask in kunchenguid/homebrew-tap
+// hatch is delivered only through the Homebrew cask in vbasky/homebrew-tap
 // (see .github/workflows/release-please.yml), so this is the upgrade command we
 // hand users: `brew update` refreshes the tap, then `brew upgrade --cask hatch`
 // installs the new build. Exported so the test pins the exact string.

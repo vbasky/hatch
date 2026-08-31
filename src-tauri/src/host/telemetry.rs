@@ -3,7 +3,7 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use serde_json::{json, Map, Value};
 
-const FALLBACK_HOST: &str = "https://a.kunchenguid.com";
+const FALLBACK_HOST: &str = "https://a.vbasky.com";
 const UMAMI_PATH: &str = "/api/send";
 
 #[derive(Clone)]
@@ -147,8 +147,8 @@ mod tests {
   #[test]
   fn appends_umami_send_path() {
     assert_eq!(
-      normalize_endpoint("https://a.kunchenguid.com"),
-      Some("https://a.kunchenguid.com/api/send".into())
+      normalize_endpoint("https://a.vbasky.com"),
+      Some("https://a.vbasky.com/api/send".into())
     );
   }
 }

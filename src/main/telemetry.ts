@@ -8,7 +8,7 @@
 // vars. With no website id configured (the default in source/dev/test) the client
 // is a no-op, so the app never phones home outside packaged release builds.
 
-const HARDCODED_FALLBACK_HOST = "https://a.kunchenguid.com";
+const HARDCODED_FALLBACK_HOST = "https://a.vbasky.com";
 const UMAMI_PATH = "/api/send";
 const DEFAULT_HOSTNAME = "app";
 const DEFAULT_TITLE = "Hatch";

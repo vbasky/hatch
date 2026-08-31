@@ -73,5 +73,5 @@ Tagline: `what would yours look like?`
 Install command:
 
 ```
-brew install --cask kunchenguid/tap/hatch
+brew install --cask vbasky/tap/hatch
 ```

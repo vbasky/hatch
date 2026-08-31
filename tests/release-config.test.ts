@@ -30,7 +30,7 @@ async function runReleaseDraftGuard(releaseState: "true" | "false" | "missing" |
     return await execFileAsync("/bin/bash", ["-c", await releaseDraftGuard()], {
       env: {
         ...process.env,
-        GITHUB_REPOSITORY: "kunchenguid/hatch",
+        GITHUB_REPOSITORY: "vbasky/hatch",
         TAG_NAME: "hatch-v0.1.23",
         GH_RELEASE_STATE: releaseState,
         PATH: `${tempDirectory}:${process.env.PATH ?? ""}`,
@@ -206,7 +206,7 @@ describe("distribution config", () => {
     expect(workflow).toContain('PACKAGE_VERSION="$(node -p "require(\'./package.json\').version")"');
     expect(workflow).toContain('if [ "$PACKAGE_VERSION" != "$VERSION" ]');
     expect(workflow).not.toContain('EXPECTED_COMMIT="a8fd9cf3cda01277358a8b5e225e2ace7b0c0593"');
-    expect(workflow).toContain("TEAM_ID: 9T2J7MNUP9");
+    expect(workflow).toContain("TEAM_ID: YOUR_TEAM_ID");
     expect(workflow).toContain("BUNDLE_ID: com.hatch.app");
     for (const secret of [
       "MAC_DEVELOPER_ID_CERT_P12",
@@ -230,7 +230,7 @@ describe("distribution config", () => {
     expect(workflow).toContain('codesign --verify --deep --strict --verbose=4 "$APP_PATH"');
     expect(workflow).toContain('TeamIdentifier=$TEAM_ID');
     expect(workflow).toContain('Identifier=$BUNDLE_ID');
-    expect(workflow).toContain("Authority=Developer ID Application: Kun Chen ($TEAM_ID)");
+    expect(workflow).toContain("Authority=Developer ID Application: YOUR_NAME ($TEAM_ID)");
     expect(workflow).toContain("flags=.*runtime");
     expect(workflow).toContain("^Timestamp=.+$");
     expect(workflow).toContain("verify_code_object");
@@ -313,7 +313,7 @@ describe("distribution config", () => {
     expect(workflow).toContain('while [ -e "#{appdir}/Hatch.app" ]; do');
     expect(workflow).toContain('/usr/bin/open -a "#{appdir}/Hatch.app"');
     expect(workflow).not.toContain("hatch.relaunch");
-    expect(workflow).not.toContain("/tmp/com.kunchenguid.hatch");
+    expect(workflow).not.toContain("/tmp/com.vbasky.hatch");
     expect(workflow).not.toContain("tags:");
     await expect(stat(resolve(import.meta.dirname, "../.github/workflows/release.yml"))).rejects.toMatchObject({
       code: "ENOENT",

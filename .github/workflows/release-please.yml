@@ -43,7 +43,7 @@ jobs:
       group: ${{ github.workflow }}-macos-${{ inputs.tag_name || needs.release-please.outputs.hatch-tag-name }}
       cancel-in-progress: false
     env:
-      TEAM_ID: 9T2J7MNUP9
+      TEAM_ID: YOUR_TEAM_ID
       BUNDLE_ID: com.hatch.app
       TAG_NAME: ${{ inputs.tag_name || needs.release-please.outputs.hatch-tag-name }}
       VERSION: ${{ inputs.version || needs.release-please.outputs.hatch-version }}
@@ -195,7 +195,7 @@ jobs:
             exit 1
           fi
           SIGNING_IDENTITIES="$(security find-identity -v -p codesigning "$VALIDATION_KEYCHAIN")"
-          if ! grep -Fq "Developer ID Application: Kun Chen ($TEAM_ID)" <<<"$SIGNING_IDENTITIES"; then
+          if ! grep -Fq "Developer ID Application: YOUR_NAME ($TEAM_ID)" <<<"$SIGNING_IDENTITIES"; then
             echo "The certificate is not the expected Developer ID Application identity for Team $TEAM_ID." >&2
             exit 1
           fi
@@ -222,7 +222,7 @@ jobs:
 
       - name: Build
         env:
-          HATCH_UMAMI_HOST: https://a.kunchenguid.com
+          HATCH_UMAMI_HOST: https://a.vbasky.com
           HATCH_UMAMI_WEBSITE_ID: ${{ vars.HATCH_UMAMI_WEBSITE_ID }}
         run: pnpm build
 
@@ -294,7 +294,7 @@ jobs:
           APP_SIGNATURE="$(codesign -d --verbose=4 "$APP_PATH" 2>&1)"
           grep -Fq "Identifier=$BUNDLE_ID" <<<"$APP_SIGNATURE"
           grep -Fq "TeamIdentifier=$TEAM_ID" <<<"$APP_SIGNATURE"
-          grep -Fq "Authority=Developer ID Application: Kun Chen ($TEAM_ID)" <<<"$APP_SIGNATURE"
+          grep -Fq "Authority=Developer ID Application: YOUR_NAME ($TEAM_ID)" <<<"$APP_SIGNATURE"
           grep -Eq '^CodeDirectory .*flags=.*runtime' <<<"$APP_SIGNATURE"
           grep -Eq '^Timestamp=.+$' <<<"$APP_SIGNATURE"
 
@@ -326,7 +326,7 @@ jobs:
               signature="$(codesign -d --verbose=4 "$code_object" 2>&1)"
             fi
             grep -Fq "TeamIdentifier=$TEAM_ID" <<<"$signature"
-            grep -Fq "Authority=Developer ID Application: Kun Chen ($TEAM_ID)" <<<"$signature"
+            grep -Fq "Authority=Developer ID Application: YOUR_NAME ($TEAM_ID)" <<<"$signature"
             grep -Eq '^CodeDirectory .*flags=.*runtime' <<<"$signature"
             grep -Eq '^Timestamp=.+$' <<<"$signature"
           }
@@ -515,17 +515,17 @@ jobs:
         env:
           HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |
-          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/kunchenguid/homebrew-tap.git" "$RUNNER_TEMP/homebrew-tap"
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/vbasky/homebrew-tap.git" "$RUNNER_TEMP/homebrew-tap"
           mkdir -p "$RUNNER_TEMP/homebrew-tap/Casks"
           cat > "$RUNNER_TEMP/homebrew-tap/Casks/hatch.rb" << CASK_EOF
           cask "hatch" do
             version "${VERSION}"
             sha256 "${SHA256}"
 
-            url "https://github.com/kunchenguid/hatch/releases/download/${TAG_NAME}/Hatch-${VERSION}-universal.dmg"
+            url "https://github.com/vbasky/hatch/releases/download/${TAG_NAME}/Hatch-${VERSION}-universal.dmg"
             name "Hatch"
             desc "Menu-bar app that writes its own widgets"
-            homepage "https://github.com/kunchenguid/hatch"
+            homepage "https://github.com/vbasky/hatch"
 
             depends_on macos: :ventura
 

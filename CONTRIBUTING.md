@@ -3,7 +3,7 @@
 Thanks for wanting to contribute.
 One rule up front:
 
-**Human-authored pull requests targeting `main` must be raised through [`no-mistakes`](https://github.com/kunchenguid/no-mistakes).**
+**Human-authored pull requests targeting `main` must be raised through [`no-mistakes`](https://github.com/vbasky/no-mistakes).**
 We require this to reduce the maintainer's burden of reviewing and merging contributions.
 
 `no-mistakes` puts a local git proxy in front of your real remote.
@@ -18,7 +18,7 @@ Regular contributor PRs without the signature and attestation will not be review
 Fork routing requires `no-mistakes` v1.30.1 or newer.
 This repository's required check also needs `no-mistakes` >= 1.46.0 so the PR body includes structured pipeline step attestation.
 
-1. Fork the repo, then clone the parent repo or set your local `origin` back to the parent repo (`git@github.com:kunchenguid/hatch.git`).
+1. Fork the repo, then clone the parent repo or set your local `origin` back to the parent repo (`git@github.com:vbasky/hatch.git`).
 2. Create a branch and make your changes.
 3. Initialize or refresh the gate with your fork as the push target: `no-mistakes init --fork-url git@github.com:<you>/hatch.git`.
 4. Commit your changes.
@@ -26,7 +26,7 @@ This repository's required check also needs `no-mistakes` >= 1.46.0 so the PR bo
 6. Run `no-mistakes` to attach to the pipeline, watch findings, and auto-fix or review as needed.
 7. Once the pipeline passes, it pushes the branch to your fork and opens the PR against this repo for you.
 
-See the [no-mistakes quick start](https://kunchenguid.github.io/no-mistakes/start-here/quick-start/) for the full first-run walkthrough.
+See the [no-mistakes quick start](https://vbasky.github.io/no-mistakes/start-here/quick-start/) for the full first-run walkthrough.
 
 ## Repo Conventions
 
@@ -48,16 +48,16 @@ Hatch releases are proposed by release-please after conventional commits land on
 Use prefixes such as `feat:` and `fix:` so release-please can choose the version bump and release notes.
 Mark breaking changes with `!` in the commit type or a `BREAKING CHANGE:` footer.
 Merging the release-please PR creates the version tag and a draft GitHub Release.
-The release-please workflow builds the universal macOS app, signs every code object with `Developer ID Application: Kun Chen (9T2J7MNUP9)`, notarizes and staples the app and DMG, verifies the publication-ready DMG, computes its checksum, uploads it to the draft, and only then publishes the release before updating `kunchenguid/homebrew-tap`.
+The release-please workflow builds the universal macOS app, signs every code object with `Developer ID Application: YOUR_NAME (YOUR_TEAM_ID)`, notarizes and staples the app and DMG, verifies the publication-ready DMG, computes its checksum, uploads it to the draft, and only then publishes the release before updating `vbasky/homebrew-tap`.
 Any signing, notarization, verification, packaged runtime, checksum, or GitHub upload failure leaves the release as a draft and stops before stable publication and tap publication. A missing or invalid `HOMEBREW_TAP_TOKEN`, or another tap update failure, occurs after stable publication and fails the workflow without updating Homebrew.
 The generated Homebrew Cask quits Hatch during upgrade and relaunches it after installation only when the app was already running before uninstall started.
 
 Maintainers must keep these repository secrets provisioned from the canonical secure owners:
 
-- `MAC_DEVELOPER_ID_CERT_P12` - base64 of the password-protected Developer ID Application certificate and private key for Team `9T2J7MNUP9`.
+- `MAC_DEVELOPER_ID_CERT_P12` - base64 of the password-protected Developer ID Application certificate and private key for Team `YOUR_TEAM_ID`.
 - `MAC_DEVELOPER_ID_CERT_PASSWORD` - the p12 export password.
 - `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, and `APP_STORE_CONNECT_API_KEY` - the App Store Connect API credentials used by `notarytool`; the API key is base64-encoded p8 content.
-- `HOMEBREW_TAP_TOKEN` - write access to `kunchenguid/homebrew-tap` for the final cask update.
+- `HOMEBREW_TAP_TOKEN` - write access to `vbasky/homebrew-tap` for the final cask update.
 
 Never commit or print credential contents. Missing or malformed secrets fail the real release job; pull-request CI remains secret-free and validates the release config through `tests/release-config.test.ts`.
 Maintainers must also keep the `HATCH_UMAMI_WEBSITE_ID` GitHub Actions repository variable configured for packaged-release telemetry; it is intentionally a variable rather than a secret because the id is baked into the app and sent in Umami payloads.
@@ -84,8 +84,8 @@ test "$(plutil -extract CFBundleShortVersionString raw -o - "$APP/Contents/Info.
 codesign --verify --deep --strict --verbose=4 "$APP"
 SIGNATURE="$(codesign -d --verbose=4 "$APP" 2>&1)"
 grep -Fq 'Identifier=com.hatch.app' <<<"$SIGNATURE"
-grep -Fq 'TeamIdentifier=9T2J7MNUP9' <<<"$SIGNATURE"
-grep -Fq 'Authority=Developer ID Application: Kun Chen (9T2J7MNUP9)' <<<"$SIGNATURE"
+grep -Fq 'TeamIdentifier=YOUR_TEAM_ID' <<<"$SIGNATURE"
+grep -Fq 'Authority=Developer ID Application: YOUR_NAME (YOUR_TEAM_ID)' <<<"$SIGNATURE"
 grep -Eq '^CodeDirectory .*flags=.*runtime' <<<"$SIGNATURE"
 grep -Eq '^Timestamp=.+$' <<<"$SIGNATURE"
 spctl --assess --type execute --verbose=4 "$APP"

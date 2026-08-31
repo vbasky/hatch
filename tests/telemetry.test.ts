@@ -87,7 +87,7 @@ describe("telemetry config resolution", () => {
 
     expect(config).toEqual({
       enabled: true,
-      host: "https://a.kunchenguid.com",
+      host: "https://a.vbasky.com",
       websiteID: "build-id",
     });
   });

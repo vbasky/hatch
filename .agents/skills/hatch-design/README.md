@@ -1,6 +1,6 @@
 # Hatch Design System
 
-A design system for **Hatch** — a macOS tray-bar Electron app that lives behind a system menu-bar icon. Click the tray icon and a small dark popover falls from the menu bar. Inside the popover, an embedded agent can edit the active extension workspace at runtime to add widgets, and the user can interact with those widgets without ever leaving the menu surface.
+A design system for **Hatch** — a macOS tray-bar app that lives behind a system menu-bar icon. Click the tray icon and a small dark popover falls from the menu bar. Inside the popover, an embedded agent can edit the active extension workspace at runtime to add widgets, and the user can interact with those widgets without ever leaving the menu surface.
 
 The visual direction is **Monochrome Lab** — terminal-elegant, near-black, mono type, one mint signal color. The popover should read as a calm command-line surface that happens to live in the macOS menu bar.
 
@@ -25,7 +25,7 @@ Agent options are radio-like rows: available inactive agents can be selected, un
 
 This system was built from the live codebase at:
 
-- **GitHub:** https://github.com/kunchenguid/hatch (`main`)
+- **GitHub:** https://github.com/vbasky/hatch (`main`)
 
 Key files referenced (paths in that repo):
 
@@ -260,4 +260,4 @@ A designer or agent picking this up:
 2. Open the Design System tab to flip through every token as a card.
 3. Open `ui_kits/popup-menu/index.html` to see the popover live as a clickable prototype.
 4. Cross-reference `src/ui/theme.css` for production widget values and `colors_and_type.css` for prototype values - never invent a new color.
-5. Cross-reference the [live repo](https://github.com/kunchenguid/hatch) for ground truth on data shapes (`src/shared/contracts.ts`) and on extension/widget conventions (`extensions/AGENTS.md`).
+5. Cross-reference the [live repo](https://github.com/vbasky/hatch) for ground truth on data shapes (`src/shared/contracts.ts`) and on extension/widget conventions (`extensions/AGENTS.md`).

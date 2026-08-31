@@ -1,6 +1,9 @@
 import packageJson from "../package.json";
 import { describe, expect, it } from "vitest";
 
+const devDependencies = packageJson.devDependencies as Record<string, string | undefined>;
+const scripts = packageJson.scripts as Record<string, string | undefined>;
+
 describe("package configuration", () => {
   it("pins dependency versions instead of using latest", () => {
     const dependencyGroups = [packageJson.dependencies, packageJson.devDependencies];
@@ -14,20 +17,22 @@ describe("package configuration", () => {
     expect(packageJson.engines?.node).toBe(">=22.12");
   });
 
-  it("does not install Electron after dependency installation", () => {
-    expect(packageJson.scripts?.postinstall).toBeUndefined();
-    expect(packageJson.devDependencies?.electron).toBeUndefined();
+  it("packages with Tauri, not Electron", () => {
+    expect(devDependencies.electron).toBeUndefined();
+    expect(devDependencies["electron-builder"]).toBeUndefined();
+    expect(devDependencies["@tauri-apps/cli"]).toBeDefined();
+    expect(scripts.tauri).toBe("tauri");
   });
 
   it("runs only the root test directory so generated dev workspaces are not discovered", () => {
-    expect(packageJson.scripts?.test).toBe("vitest run tests");
+    expect(scripts.test).toBe("vitest run tests");
   });
 
   it("provides an explicit command to destroy the generated dev extension workspace", () => {
-    expect(packageJson.scripts?.["dev:reset"]).toBe("node scripts/dev.mjs --reset");
+    expect(scripts["dev:reset"]).toBe("node scripts/dev.mjs --reset");
   });
 
   it("does not expose a direct start script that bypasses the packaged app path", () => {
-    expect(packageJson.scripts).not.toHaveProperty("start");
+    expect(scripts).not.toHaveProperty("start");
   });
 });

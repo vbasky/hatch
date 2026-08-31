@@ -311,7 +311,7 @@ export type HatchApi = {
     removeAgent: (name: string) => Promise<HatchSettings>;
   };
   app: {
-    /** Fully quits the Electron app from the popover shell. */
+    /** Fully quits the host app from the popover shell. */
     quit: () => Promise<{ ok: boolean }>;
     /** Current update status from the host's cached background release check. */
     getUpdateStatus: () => Promise<UpdateStatus>;

@@ -1,7 +1,7 @@
 # hatch extensions
 
 This directory is for self-contained hatch extensions.
-An embedded agent launched from hatch should prefer editing files here instead of changing Electron core infrastructure.
+An embedded agent launched from hatch should prefer editing files here instead of changing host core infrastructure.
 Do not modify files outside this directory unless the user explicitly asks.
 
 ## Stay inside this workspace

@@ -1,9 +1,9 @@
 <h1 align="center">hatch</h1>
 <p align="center">
-  <a href="https://github.com/kunchenguid/hatch/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/kunchenguid/hatch/ci.yml?style=flat-square&label=ci" /></a>
+  <a href="https://github.com/vbasky/hatch/actions/workflows/ci.yml"><img alt="CI" src="https://img.shields.io/github/actions/workflow/status/vbasky/hatch/ci.yml?style=flat-square&label=ci" /></a>
   <a href="https://img.shields.io/badge/platform-macOS-blue?style=flat-square"><img alt="Platform" src="https://img.shields.io/badge/platform-macOS-blue?style=flat-square" /></a>
   <a href="https://img.shields.io/badge/tauri-2-9feaf9?style=flat-square"><img alt="Tauri" src="https://img.shields.io/badge/tauri-2-9feaf9?style=flat-square" /></a>
-  <a href="https://x.com/kunchenguid"><img alt="X" src="https://img.shields.io/badge/X-@kunchenguid-black?style=flat-square" /></a>
+  <a href="https://x.com/vbasky"><img alt="X" src="https://img.shields.io/badge/X-@vbasky-black?style=flat-square" /></a>
   <a href="https://discord.gg/Wsy2NpnZDu"><img alt="Discord" src="https://img.shields.io/discord/1439901831038763092?style=flat-square&label=discord" /></a>
 </p>
 
@@ -34,7 +34,7 @@ You ask for a feature in plain English, the agent writes an extension and it hot
 Requires macOS 13 Ventura or newer, Homebrew, and a supported, already-authenticated agent CLI such as `claude` or `codex` on `PATH`.
 
 ```sh
-brew install --cask kunchenguid/tap/hatch
+brew install --cask vbasky/tap/hatch
 open -a "Hatch"
 ```
 

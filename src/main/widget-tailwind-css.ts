@@ -11,7 +11,7 @@ const require = createRequire(import.meta.url);
 
 // Anchor PostCSS's `from` at the install root that owns `node_modules/tailwindcss`
 // so `@import "tailwindcss"` resolves in both source and packaged runtimes,
-// independent of process.cwd() (which is unreliable in a packaged Electron app).
+// independent of process.cwd() (which is unreliable in a packaged app).
 function tailwindResolveBase(): string {
   const entry = require.resolve("tailwindcss");
   const [base] = entry.split(`${sep}node_modules${sep}`);
