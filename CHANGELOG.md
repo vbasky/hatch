@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/vbasky/hatch/compare/v0.1.24...v0.2.0) (2026-09-01)
+
+### Features
+
+* add Linux (KDE/Plasma) system-tray support with deb/rpm packages and an AUR PKGBUILD
+* switch releases to the tag-triggered workflow convention (push a `v*` tag to release)
+
+### Bug Fixes
+
+* prepare Tauri resources before cargo check so CI no longer fails on the resources glob
+* fix the grok-quota `IncomingHttpHeaders` type error that blocked typecheck
+
 ## [0.1.24](https://github.com/vbasky/hatch/compare/hatch-v0.1.23...hatch-v0.1.24) (2026-07-25)
 
 

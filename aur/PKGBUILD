@@ -1,7 +1,7 @@
 # Maintainer: vbasky <vbasky@users.noreply.github.com>
 
 pkgname=hatch
-pkgver=0.1.24
+pkgver=0.2.0
 pkgrel=1
 pkgdesc="Menu-bar app that writes its own widgets (system tray popover for macOS and KDE/Plasma)"
 arch=('x86_64' 'aarch64')
@@ -20,7 +20,7 @@ makedepends=(
   'rust'
   'cargo'
 )
-source=("$pkgname-$pkgver.tar.gz::https://github.com/vbasky/hatch/archive/refs/tags/hatch-v$pkgver.tar.gz")
+source=("$pkgname-$pkgver.tar.gz::https://github.com/vbasky/hatch/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')
 
 build() {

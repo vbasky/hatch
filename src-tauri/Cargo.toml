@@ -1,6 +1,6 @@
 [package]
 name = "hatch"
-version = "0.1.24"
+version = "0.2.0"
 description = "Menu-bar app that writes its own widgets"
 authors = ["YOUR_NAME"]
 edition = "2021"
