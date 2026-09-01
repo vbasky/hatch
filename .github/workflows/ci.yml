@@ -70,7 +70,7 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: Prepare Tauri resources
-        run: pnpm install --frozen-lockfile && node scripts/prepare-tauri-resources.mjs
+      - name: Build and prepare Tauri resources
+        run: pnpm install --frozen-lockfile && node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
       - name: Check Tauri host
         run: cargo check --manifest-path src-tauri/Cargo.toml

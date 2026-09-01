@@ -141,7 +141,13 @@ export function resolveDefaultAgentName(options: ResolveDefaultAgentNameOptions 
   const catalog = options.catalog ?? resolveAgentCatalog();
   if (catalog.length === 0) return null;
   const hasCommand = options.commandExists ?? commandExists;
-  const detected = catalog.find((agent) => (agent.launchCommand ? true : hasCommand(agent.command)))?.name;
+  const detected = catalog.find((agent) => {
+    if (agent.launchCommand) {
+      const executable = agent.launchCommand.trim().split(/\s+/)[0];
+      return hasCommand(executable);
+    }
+    return hasCommand(agent.command);
+  })?.name;
   if (detected) return detected;
   return options.allowFallbackWhenMissing === false ? null : catalog[0].name;
 }
