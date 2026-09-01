@@ -56,7 +56,7 @@ Build the Linux bundles:
 
 ```sh
 # Install Tauri Linux system dependencies first, e.g. on Debian/Ubuntu:
-# sudo apt install libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf \
+# sudo apt install libwebkit2gtk-4.1-dev librsvg2-dev patchelf \
 #   libgtk-3-dev libayatana-appindicator3-dev
 pnpm install
 node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
