@@ -10,7 +10,6 @@ const ACTION =
 interface PullRequestTrigger {
   types: string[];
   branches: string[];
-  "paths-ignore": string[];
 }
 
 interface Workflow {
@@ -49,11 +48,6 @@ describe("no-mistakes-required workflow contract", () => {
     expect(config.on.pull_request).toEqual({
       types: ["opened", "edited", "reopened"],
       branches: ["main"],
-      "paths-ignore": [
-        ".release-please-manifest.json",
-        "CHANGELOG.md",
-        "package.json",
-      ],
     });
     expect(config.permissions).toEqual({ contents: "read" });
     expect(config.concurrency).toEqual({
@@ -66,7 +60,7 @@ describe("no-mistakes-required workflow contract", () => {
     expect(check.name).toBe("PR must be raised via no-mistakes");
     expect(check["runs-on"]).toBe("ubuntu-latest");
     expect(check.if).toBe(
-      "github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.user.login != 'dependabot[bot]' && github.event.pull_request.user.login != 'release-please[bot]'",
+      "github.event.pull_request.user.login != 'github-actions[bot]' && github.event.pull_request.user.login != 'dependabot[bot]'",
     );
   });
 

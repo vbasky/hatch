@@ -3,13 +3,6 @@ name: ci
 on:
   pull_request:
     branches: [main]
-    # release-please opens its release PR with GITHUB_TOKEN, which creates a
-    # pull_request run that can only sit in action_required. Its output set is
-    # exactly these files, so excluding them means no run is ever created.
-    paths-ignore:
-      - .release-please-manifest.json
-      - CHANGELOG.md
-      - package.json
   push:
     branches: [main]
 
@@ -70,5 +63,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.1.1
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Prepare Tauri resources
+        run: pnpm install --frozen-lockfile && node scripts/prepare-tauri-resources.mjs
       - name: Check Tauri host
         run: cargo check --manifest-path src-tauri/Cargo.toml

@@ -2,6 +2,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import https from "node:https";
+import type { IncomingHttpHeaders } from "node:http";
 import os from "node:os";
 import path from "node:path";
 import type { HatchServerContext } from "@hatch/contracts";
@@ -743,7 +744,7 @@ function extractPayload(body: Buffer): Buffer | ActionFailure {
   return body;
 }
 
-function headerMap(headers: https.IncomingHttpHeaders): Record<string, string> {
+function headerMap(headers: IncomingHttpHeaders): Record<string, string> {
   const mapped: Record<string, string> = {};
   for (const [key, value] of Object.entries(headers)) {
     if (typeof value === "string") mapped[key.toLowerCase()] = value;

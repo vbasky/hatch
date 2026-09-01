@@ -13,13 +13,6 @@ on:
     types: [opened, edited, reopened]
     branches:
       - main
-    # Never create a run for a release-please PR. The job-level author exemption
-    # below cannot do this: it is evaluated inside a run, and a GITHUB_TOKEN PR's
-    # run is created in action_required and never starts.
-    paths-ignore:
-      - .release-please-manifest.json
-      - CHANGELOG.md
-      - package.json
 
 permissions:
   contents: read
@@ -36,11 +29,10 @@ jobs:
   check:
     name: PR must be raised via no-mistakes
     runs-on: ubuntu-latest
-    # Known automation accounts are exempt so release and dependency automation keeps working.
+    # Known automation accounts are exempt so dependency automation keeps working.
     if: >-
       github.event.pull_request.user.login != 'github-actions[bot]' &&
-      github.event.pull_request.user.login != 'dependabot[bot]' &&
-      github.event.pull_request.user.login != 'release-please[bot]'
+      github.event.pull_request.user.login != 'dependabot[bot]'
     steps:
       # The enforcement itself now lives in the shared composite action in the
       # no-mistakes repository, so this repository no longer carries its own
