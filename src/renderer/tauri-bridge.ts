@@ -2,8 +2,15 @@ import { createHatchApi, type HatchTransport } from "../shared/hatch-bridge";
 
 type HostRpcPayload = { ok?: boolean; result?: unknown; error?: string };
 
+function rpcUrl(): string {
+  if (import.meta.env.DEV && !("__TAURI_INTERNALS__" in window)) {
+    return "http://127.0.0.1:5280/__rpc";
+  }
+  return "/__rpc";
+}
+
 export async function invokeHostRpc(channel: string, args: unknown[]): Promise<unknown> {
-  const response = await fetch("/__rpc", {
+  const response = await fetch(rpcUrl(), {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ channel, args }),
@@ -16,7 +23,7 @@ export async function invokeHostRpc(channel: string, args: unknown[]): Promise<u
 }
 
 function packagedHttpOrigin(): boolean {
-  return window.location.protocol.startsWith("http") && import.meta.env.DEV !== true;
+  return !("__TAURI_INTERNALS__" in window);
 }
 
 type HostEventDetail = { channel?: string; payload?: unknown };

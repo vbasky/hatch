@@ -59,6 +59,40 @@ describe("distribution config", () => {
     expect(copyScript).not.toContain("src-tauri/binaries");
   });
 
+  it("runs Vite and Tauri from local node_modules instead of pnpm", async () => {
+    const build = await readFile(resolve(import.meta.dirname, "../scripts/build.mjs"), "utf8");
+    const launcher = await readFile(resolve(import.meta.dirname, "../scripts/dev.mjs"), "utf8");
+    const config = await readFile(resolve(import.meta.dirname, "../src-tauri/tauri.conf.json"), "utf8");
+
+    expect(build).not.toMatch(/["']pnpm["']/);
+    expect(build).toContain("node_modules/vite/bin/vite.js");
+    expect(launcher).not.toMatch(/["']pnpm["']/);
+    expect(launcher).toContain("node_modules/@tauri-apps/cli/tauri.js");
+    expect(config).not.toContain("pnpm exec vite");
+    expect(config).toContain("node_modules/vite/bin/vite.js");
+  });
+
+  it("uses a Qt/KDE Linux shell instead of GTK WebKit", async () => {
+    const cargo = await readFile(resolve(import.meta.dirname, "../src-tauri/Cargo.toml"), "utf8");
+    const pkgbuild = await readFile(resolve(import.meta.dirname, "../aur/PKGBUILD"), "utf8");
+    const lib = await readFile(resolve(import.meta.dirname, "../src-tauri/src/lib.rs"), "utf8");
+    const desktop = await readFile(resolve(import.meta.dirname, "../assets/linux/hatch.desktop"), "utf8");
+
+    expect(cargo).toContain("[target.'cfg(target_os = \"macos\")'.dependencies]");
+    expect(cargo).toMatch(/tauri = \{ version = "2"/);
+    expect(lib).toContain("mod kde");
+    expect(lib).toContain("kde::run()");
+    expect(pkgbuild).toContain("qt6-webengine");
+    expect(pkgbuild).toContain("qt6-base");
+    expect(pkgbuild).toContain("layer-shell-qt");
+    expect(pkgbuild).toContain("kwindowsystem");
+    expect(pkgbuild).not.toContain("webkit2gtk");
+    expect(pkgbuild).not.toContain("libappindicator-gtk3");
+    expect(pkgbuild).toContain("cargo build --release");
+    expect(desktop).toContain("Exec=hatch");
+    expect(desktop).toContain("Icon=hatch");
+  });
+
   it("packages Hatch under com.hatch.app", async () => {
     const config = await readFile(resolve(import.meta.dirname, "../src-tauri/tauri.conf.json"), "utf8");
     const devConfig = await readFile(resolve(import.meta.dirname, "../src-tauri/tauri.dev.conf.json"), "utf8");
@@ -233,12 +267,14 @@ describe("distribution config", () => {
 
     expect(workflow).toContain("  linux:");
     expect(workflow).toContain("needs: [linux]");
-    expect(workflow).toContain("libwebkit2gtk-4.1-dev");
-    expect(workflow).toContain("libayatana-appindicator3-dev");
-    expect(workflow).toContain("pnpm exec tauri build --bundles deb,rpm");
+    expect(workflow).toContain("qt6-base-dev");
+    expect(workflow).toContain("qt6-webengine-dev");
+    expect(workflow).toContain("liblayershellqtinterface-dev");
+    expect(workflow).not.toContain("libwebkit2gtk-4.1-dev");
+    expect(workflow).not.toContain("libayatana-appindicator3-dev");
+    expect(workflow).toContain("cargo build --release --manifest-path src-tauri/Cargo.toml");
     expect(workflow).toContain("softprops/action-gh-release@v2");
-    expect(workflow).toContain("src-tauri/target/release/bundle/deb/*.deb");
-    expect(workflow).toContain("src-tauri/target/release/bundle/rpm/*.rpm");
+    expect(workflow).toContain("src-tauri/target/release/hatch");
 
     // The linux job must run before the macos job.
     const linuxJobIndex = workflow.indexOf("  linux:");

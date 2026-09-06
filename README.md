@@ -45,17 +45,11 @@ open -a "Hatch"
 
 ### Linux
 
-Hatch runs as a KDE/Plasma system-tray app. Releases publish `deb` and `rpm` packages; Arch Linux users can install from the [AUR](https://aur.archlinux.org/packages/hatch) (or build from source — see [docs/development.md](docs/development.md#linux)).
+Hatch on Linux is a native KDE/Plasma system-tray app (Qt 6 + Qt WebEngine, StatusNotifierItem). Arch Linux users can install from the [AUR](https://aur.archlinux.org/packages/hatch) or build from source — see [docs/development.md](docs/development.md#linux).
 
 Requires a supported, already-authenticated agent CLI such as `claude` or `codex` on `PATH`.
 
 ```sh
-# Debian/Ubuntu:
-sudo apt install ./hatch_<version>_amd64.deb
-
-# Fedora/RHEL:
-sudo dnf install ./hatch-<version>-1.x86_64.rpm
-
 # Arch (AUR):
 yay -S hatch
 ```
@@ -121,7 +115,7 @@ For agent selection, custom ACP agents, telemetry, and environment flags, see [d
    └─────────────────────┘
 ```
 
-- **Three processes, one bridge** - the renderer never touches git, the agent, or the filesystem; everything goes through `window.hatch`. (On Linux the tray interaction is a context menu — Toggle Hatch / Quit — since Linux tray icons cannot report clicks.)
+- **Three processes, one bridge** - the renderer never touches git, the agent, or the filesystem; everything goes through `window.hatch`. On Linux the popover toggles from a left-click on the Plasma StatusNotifier tray icon; the context menu still has Toggle Hatch / Quit.
 - **Recipes are specs, not prompts** - HTML files under `extensions/recipes/` describe a widget's capability and data sources; the agent reads the matching recipe before implementing.
   For live or system data, recipe guidance requires the agent to inspect the real source before parsing it and verify the finished widget against that same data before reporting done.
   The bundled quota recipes cover Claude Code, Codex, Cursor, GitHub Copilot, and Grok.

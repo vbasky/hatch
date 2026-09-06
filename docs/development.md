@@ -50,22 +50,25 @@ Single test: `pnpm vitest run tests/<name>.test.ts` or `pnpm vitest run -t "<pat
 
 ## Linux
 
-Hatch is a Tauri 2 app, so the same codebase builds for Linux as a system-tray application (tested against KDE/Plasma). The tray interaction differs from macOS: Linux StatusNotifier tray icons cannot report clicks, so the popover is toggled from the tray context menu (Toggle Hatch / Quit) and is positioned at the cursor. The tray icon is a full-color PNG (`assets/tray/hatch.png`) rather than a macOS template image.
+Hatch on Linux is a Qt 6 / Plasma shell, not Tauri. The tray icon is a StatusNotifierItem (`QSystemTrayIcon` on Plasma), and the popover is a frameless `QWebEngineView` hosting the same React UI. Left-click toggles the popover; the context menu still has Toggle Hatch / Quit. The tray icon is a full-color PNG (`assets/tray/hatch.png`) rather than a macOS template image.
 
-Build the Linux bundles:
+macOS still uses the Tauri 2 / Cocoa host.
+
+Build the Linux binary:
 
 ```sh
-# Install Tauri Linux system dependencies first, e.g. on Debian/Ubuntu:
-# sudo apt install libwebkit2gtk-4.1-dev librsvg2-dev patchelf \
-#   libgtk-3-dev libayatana-appindicator3-dev
+# Debian/Ubuntu:
+# sudo apt install qt6-base-dev qt6-webengine-dev pkg-config g++
+# Arch:
+# sudo pacman -S qt6-base qt6-webengine layer-shell-qt
 pnpm install
 node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
-pnpm exec tauri build --bundles deb,rpm
+cargo build --release --manifest-path src-tauri/Cargo.toml
 ```
 
-Artifacts land in `src-tauri/target/release/bundle/`. On Wayland, positioning the popover at the cursor is limited by the compositor; X11 supports it fully.
+The binary lands at `src-tauri/target/release/hatch`. Packaged installs load UI, adapters, and the extension template from `/usr/share/hatch`. On Wayland the popover is a layer-shell surface anchored to the panel (regular `setGeometry` is ignored by the compositor); if tray geometry is missing it uses the cursor, then pins above or below the panel.
 
-Arch Linux ships via the [AUR PKGBUILD](../aur/PKGBUILD), which builds the release from source against the system webkit2gtk/gtk3 (no bundled runtime). The release workflow builds `deb`/`rpm`, uploads them to the GitHub release, and updates the AUR package and Homebrew cask.
+Arch Linux ships via the [AUR PKGBUILD](../aur/PKGBUILD), which builds against system Qt 6 WebEngine. The release workflow builds the Linux binary, uploads it to the GitHub release, and updates the AUR package and Homebrew cask.
 
 > Note: Linux packages are built and published from the `release.yml` workflow; there is no separate Linux CI job on pull requests beyond `cargo check` and the JS checks in `ci.yml`.
 

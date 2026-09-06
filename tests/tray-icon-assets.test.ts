@@ -4,7 +4,7 @@ import { inflateSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 const TRAY_DIR = resolve(import.meta.dirname, "../assets/tray");
-const LIB_RS = resolve(import.meta.dirname, "../src-tauri/src/lib.rs");
+const LIB_RS = resolve(import.meta.dirname, "../src-tauri/src/tauri_app.rs");
 const TRAY_RS = resolve(import.meta.dirname, "../src-tauri/src/tray.rs");
 
 type RgbaPng = {
@@ -121,6 +121,27 @@ describe("Hatch tray template", () => {
     expect(box.heightRatio).toBeLessThanOrEqual(0.86);
     expect(box.widthRatio).toBeGreaterThanOrEqual(0.5);
     expect(box.widthRatio).toBeLessThanOrEqual(0.72);
+  });
+
+  it("ships a black glyph for light panels and a white glyph for dark panels", async () => {
+    const white = decodeRgbaPng(await readFile(resolve(TRAY_DIR, "hatch.png")));
+    const black = decodeRgbaPng(await readFile(resolve(TRAY_DIR, "hatch-light.png")));
+    expect(white.width).toBe(black.width);
+    expect(white.height).toBe(black.height);
+
+    function meanOpaqueLuma(png: RgbaPng): number {
+      let total = 0;
+      let count = 0;
+      for (let i = 0; i < png.data.length; i += 4) {
+        if (png.data[i + 3] <= 20) continue;
+        total += (png.data[i] * 299 + png.data[i + 1] * 587 + png.data[i + 2] * 114) / 1000;
+        count += 1;
+      }
+      return count === 0 ? 0 : total / count;
+    }
+
+    expect(meanOpaqueLuma(white)).toBeGreaterThan(200);
+    expect(meanOpaqueLuma(black)).toBeLessThan(40);
   });
 
   it("loads the @3x template and sizes the status item to 18pt", async () => {

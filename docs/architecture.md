@@ -7,6 +7,7 @@ For the at-a-glance picture, see the "How It Works" diagram in the [README](../R
 
 - **Three processes, one bridge.**
   The renderer never touches git, the agent, or the filesystem - everything goes through `window.hatch` exposed in `src/preload/index.ts`.
+  macOS uses a Tauri 2 / Cocoa tray host; Linux uses a Qt 6 Plasma StatusNotifier shell with Qt WebEngine for the same React popover.
 - **Settings overlay.**
   Settings covers the menu without unmounting it, so composer, widget, and run state survive opening and closing it.
 - **Manual layout reload.**

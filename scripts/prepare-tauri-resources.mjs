@@ -29,5 +29,8 @@ if (existsSync(join(rootDir, "out/adapters"))) {
 }
 
 cpSync(join(rootDir, "package.json"), join(resourcesDir, "package.json"));
+if (existsSync(join(rootDir, "out/renderer"))) {
+  cpSync(join(rootDir, "out/renderer"), join(resourcesDir, "renderer"), { recursive: true });
+}
 
 // Native host: Node sidecar is no longer packaged.

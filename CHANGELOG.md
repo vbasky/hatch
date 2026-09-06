@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Features
+
+* run Linux Hatch as a native KDE/Plasma shell (Qt 6 StatusNotifier tray + Qt WebEngine popover) instead of GTK/WebKit via Tauri
+
 ## [0.2.0](https://github.com/vbasky/hatch/compare/v0.1.24...v0.2.0) (2026-09-01)
 
 ### Features

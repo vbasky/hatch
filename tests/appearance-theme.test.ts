@@ -26,5 +26,22 @@ describe("appearance follow-system default", () => {
     expect(lightBlock).toMatch(/--color-ink:\s*rgba\(9,\s*9,\s*11,\s*0\.80\)/);
     expect(lightBlock).toMatch(/--color-ink-label:\s*rgba\(9,\s*9,\s*11,\s*0\.38\)/);
     expect(lightBlock).not.toMatch(/--color-ink:\s*rgba\(255,\s*255,\s*255/);
+    expect(theme).toMatch(/--ink-200:\s*rgba\(9,\s*9,\s*11,\s*0\.80\)/);
+    expect(theme).toMatch(/--bg-stage:\s*#f6f6f7/);
+  });
+
+  it("uses Plasma frosted chrome when the Linux host marks the document native", async () => {
+    const css = await readFile(resolve(import.meta.dirname, "../src/renderer/styles.css"), "utf8");
+    expect(css).toContain("html.plasma-native");
+    expect(css).toContain("Noto Sans");
+    expect(css).toContain("color-mix(in srgb, var(--plasma-window, #eff0f1) 90%, transparent)");
+    expect(css).toContain("color: #232629");
+  });
+
+  it("reads KDE/xdg color-scheme instead of only GNOME gsettings", async () => {
+    const source = await readFile(resolve(import.meta.dirname, "../extensions/appearance/server.ts"), "utf8");
+    expect(source).toContain("org.freedesktop.appearance");
+    expect(source).toContain("kreadconfig6");
+    expect(source).toContain("linuxPrefersDark");
   });
 });

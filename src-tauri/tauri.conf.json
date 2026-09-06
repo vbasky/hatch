@@ -4,7 +4,10 @@
   "version": "0.1.24",
   "identifier": "com.hatch.app",
   "build": {
-    "beforeDevCommand": "pnpm exec vite --host 127.0.0.1",
+    "beforeDevCommand": {
+      "script": "node node_modules/vite/bin/vite.js --host 127.0.0.1",
+      "cwd": ".."
+    },
     "devUrl": "http://127.0.0.1:5273",
     "beforeBuildCommand": "node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs",
     "frontendDist": "../out/renderer"

@@ -22,15 +22,16 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Install Tauri Linux system dependencies
+      - name: Install Qt/KDE Linux system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            libwebkit2gtk-4.1-dev \
-            librsvg2-dev \
-            patchelf \
-            libgtk-3-dev \
-            libayatana-appindicator3-dev
+            qt6-base-dev \
+            qt6-webengine-dev \
+            liblayershellqtinterface-dev \
+            libkf6windowsystem-dev \
+            pkg-config \
+            g++
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -53,16 +54,15 @@ jobs:
         run: |
           node scripts/build.mjs && node scripts/prepare-tauri-resources.mjs
 
-      - name: Build deb and rpm bundles
-        run: pnpm exec tauri build --bundles deb,rpm
+      - name: Build KDE/Plasma binary
+        run: cargo build --release --manifest-path src-tauri/Cargo.toml
 
       - name: Upload Linux bundles to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           files: |
-            src-tauri/target/release/bundle/deb/*.deb
-            src-tauri/target/release/bundle/rpm/*.rpm
+            src-tauri/target/release/hatch
           fail_on_unmatched_files: true
 
   macos:
@@ -536,17 +536,18 @@ jobs:
           url="https://github.com/vbasky/hatch"
           license=('MIT')
           depends=(
-            'webkit2gtk-4.1'
-            'gtk3'
-            'libappindicator-gtk3'
-            'librsvg'
-            'patchelf'
+            'qt6-base'
+            'qt6-webengine'
+            'layer-shell-qt'
+            'kwindowsystem'
           )
           makedepends=(
             'nodejs'
             'pnpm'
             'rust'
             'cargo'
+            'gcc'
+            'pkgconf'
           )
           source=("hatch-\${pkgver}.tar.gz::https://github.com/vbasky/hatch/archive/refs/tags/v\${pkgver}.tar.gz")
           sha256sums=('SKIP')
@@ -556,13 +557,16 @@ jobs:
             pnpm install --frozen-lockfile
             node scripts/build.mjs
             node scripts/prepare-tauri-resources.mjs
-            pnpm exec tauri build --bundles app
+            cargo build --release --manifest-path src-tauri/Cargo.toml
           }
 
           package() {
             cd "\$srcdir/hatch-\$pkgver"
             install -Dm755 "src-tauri/target/release/hatch" "\$pkgdir/usr/bin/hatch"
             install -Dm644 "assets/hatch-app-icon.svg" "\$pkgdir/usr/share/icons/hicolor/scalable/apps/hatch.svg"
+            install -Dm644 "assets/linux/hatch.desktop" "\$pkgdir/usr/share/applications/hatch.desktop"
+            install -d "\$pkgdir/usr/share/hatch"
+            cp -a src-tauri/resources/. "\$pkgdir/usr/share/hatch/"
           }
           PKGBUILD_EOF
 

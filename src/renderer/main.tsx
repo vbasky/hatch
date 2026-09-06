@@ -15,10 +15,24 @@ if (import.meta.env.DEV) {
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing root element");
 
+function applyPrefersColorScheme() {
+  const light = window.matchMedia?.("(prefers-color-scheme: light)")?.matches === true;
+  const mode = light ? "light" : "dark";
+  for (const el of [document.documentElement, document.body]) {
+    if (!el) continue;
+    el.dataset.theme = mode;
+    el.style.colorScheme = mode;
+    el.classList.toggle("light", light);
+    el.classList.toggle("dark", !light);
+  }
+}
+applyPrefersColorScheme();
+window.matchMedia?.("(prefers-color-scheme: light)")?.addEventListener("change", applyPrefersColorScheme);
+
 installWidgetHostShims(window, React, jsxRuntime, hatchUi);
 
 try {
-  if ("__TAURI_INTERNALS__" in window || import.meta.env.PROD) {
+  if ("__TAURI_INTERNALS__" in window || import.meta.env.PROD || window.location.protocol.startsWith("http")) {
     installTauriHatch();
   }
 } catch (error) {

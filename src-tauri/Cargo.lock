@@ -1618,13 +1618,15 @@ dependencies = [
 
 [[package]]
 name = "hatch"
-version = "0.1.24"
+version = "0.2.0"
 dependencies = [
+ "cc",
  "libc",
  "objc2",
  "objc2-app-kit",
  "objc2-foundation",
  "oxc",
+ "pkg-config",
  "rquickjs",
  "rusqlite",
  "serde",

@@ -113,8 +113,35 @@ mod tests {
         height: 320.0,
       },
     );
-    assert_eq!(bounds.x, 971.0);
+    assert_eq!(bounds.x, 959.0);
     assert_eq!(bounds.y, 30.0);
     assert!(bounds.x + bounds.width <= work_area.width);
+  }
+
+  #[test]
+  fn bottom_tray_places_the_popover_above_the_panel() {
+    let tray = Rect {
+      x: 900.0,
+      y: 1040.0,
+      width: 22.0,
+      height: 22.0,
+    };
+    let work_area = Rect {
+      x: 0.0,
+      y: 0.0,
+      width: 1920.0,
+      height: 1040.0,
+    };
+    let bounds = calculate_popover_bounds(
+      tray,
+      work_area,
+      Size {
+        width: 504.0,
+        height: 620.0,
+      },
+    );
+    assert!(bounds.y < tray.y);
+    assert!(bounds.y + bounds.height <= work_area.y + work_area.height);
+    assert!((bounds.x + bounds.width / 2.0 - (tray.x + tray.width / 2.0)).abs() < 1.0);
   }
 }

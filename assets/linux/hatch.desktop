@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Hatch
+Comment=Ask for a menu and help it hatch
+Exec=hatch
+Icon=hatch
+Terminal=false
+Categories=Utility;
+StartupNotify=false
+StartupWMClass=hatch
+X-KDE-autostart-after=panel

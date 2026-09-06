@@ -48,6 +48,28 @@ describe("dev launcher", () => {
     expect(packageJson.scripts["dev:reset"]).toBe("node scripts/dev.mjs --reset");
   });
 
+  it("runs the Qt/KDE shell on Linux instead of Tauri", async () => {
+    const { ACTIVE_ENV, runDev } = await loadLauncher();
+    const harness = createHarness();
+
+    const status = runDev({
+      cwd: "/repo",
+      env: { [ACTIVE_ENV]: "1" },
+      platform: "linux",
+      ...harness,
+    });
+
+    expect(status).toBe(0);
+    expect(harness.spawnCalls).toEqual([
+      {
+        command: "cargo",
+        args: ["run", "--manifest-path", join("/repo", "src-tauri/Cargo.toml")],
+        cwd: "/repo",
+        env: expect.objectContaining({ [ACTIVE_ENV]: "1" }),
+      },
+    ]);
+  });
+
   it("runs tauri dev directly when already inside the dev launcher", async () => {
     const { ACTIVE_ENV, runDev } = await loadLauncher();
     const harness = createHarness();
@@ -55,6 +77,7 @@ describe("dev launcher", () => {
     const status = runDev({
       cwd: "/repo",
       env: { [ACTIVE_ENV]: "1" },
+      platform: "darwin",
       ...harness,
     });
 
@@ -62,8 +85,8 @@ describe("dev launcher", () => {
     expect(harness.execCalls).toEqual([]);
     expect(harness.spawnCalls).toEqual([
       {
-        command: "pnpm",
-        args: ["exec", "tauri", "dev"],
+        command: "node",
+        args: [join("/repo", "node_modules/@tauri-apps/cli/tauri.js"), "dev"],
         cwd: "/repo",
         env: expect.objectContaining({ [ACTIVE_ENV]: "1" }),
       },
@@ -74,7 +97,7 @@ describe("dev launcher", () => {
     const { ACTIVE_ENV, EXTENSIONS_DIR_ENV, runDev } = await loadLauncher();
     const harness = createHarness();
 
-    const status = runDev({ cwd: "/repo", env: {}, ...harness });
+    const status = runDev({ cwd: "/repo", env: {}, platform: "darwin", ...harness });
 
     expect(status).toBe(0);
     expect(harness.createdDirs).toContain(join("/repo", "extensions-dev"));
@@ -97,8 +120,8 @@ describe("dev launcher", () => {
     ]);
     expect(harness.spawnCalls).toEqual([
       {
-        command: "pnpm",
-        args: ["exec", "tauri", "dev"],
+        command: "node",
+        args: [join("/repo", "node_modules/@tauri-apps/cli/tauri.js"), "dev"],
         cwd: "/repo",
         env: expect.objectContaining({
           [ACTIVE_ENV]: "1",
@@ -115,6 +138,7 @@ describe("dev launcher", () => {
     const status = runDev({
       cwd: "/repo",
       env: { HATCH_DEV_EXTENSIONS_DIR: "/tmp/hatch-dev-extensions" },
+      platform: "darwin",
       ...harness,
     });
 
@@ -138,7 +162,7 @@ describe("dev launcher", () => {
     const devExtensionsDir = join("/repo", "extensions-dev");
     const harness = createHarness();
 
-    const status = resetDevWorkspace({ cwd: "/repo", env: {}, ...harness });
+    const status = resetDevWorkspace({ cwd: "/repo", env: {}, platform: "darwin", ...harness });
 
     expect(status).toBe(0);
     expect(harness.removedDirs).toContain(devExtensionsDir);
@@ -157,8 +181,8 @@ describe("dev launcher", () => {
     });
     expect(harness.spawnCalls).toEqual([
       {
-        command: "pnpm",
-        args: ["exec", "tauri", "dev"],
+        command: "node",
+        args: [join("/repo", "node_modules/@tauri-apps/cli/tauri.js"), "dev"],
         cwd: "/repo",
         env: expect.objectContaining({
           [ACTIVE_ENV]: "1",

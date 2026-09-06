@@ -88,5 +88,39 @@
     --color-signal-live: #1a9d73;
     --color-signal-warn: #b8860b;
     --color-signal-danger: #d64555;
+
+    --bg-void: #f2f2f3;
+    --bg-stage: #f6f6f7;
+    --bg-surface: #ffffff;
+    --bg-elevated: #ececee;
+    --bg-pressed: #e2e2e6;
+    --ink-100: rgba(9, 9, 11, 0.92);
+    --ink-200: rgba(9, 9, 11, 0.80);
+    --ink-300: rgba(9, 9, 11, 0.62);
+    --ink-400: rgba(9, 9, 11, 0.48);
+    --ink-500: rgba(9, 9, 11, 0.38);
+    --ink-600: rgba(9, 9, 11, 0.22);
+    --ink-700: rgba(9, 9, 11, 0.12);
+    --ink-800: rgba(9, 9, 11, 0.08);
+    --bg: var(--bg-stage);
+    --ink: var(--ink-200);
+    --ink-strong: var(--ink-100);
+    --ink-muted: var(--ink-300);
+    --ink-soft: var(--ink-400);
+    --ink-label: var(--ink-500);
+    --ink-faint: var(--ink-600);
+    --line: var(--ink-700);
+    --line-faint: var(--ink-800);
+    color-scheme: light;
+  }
+
+  html.plasma-native.light,
+  html.plasma-native[data-theme="light"] {
+    --color-ink-strong: #232629;
+    --color-ink: #232629;
+    --color-ink-muted: #4a4c4f;
+    --color-ink-soft: #64676b;
+    --color-ink-label: #7a7e83;
+    --color-ink-faint: #8c9096;
   }
 }

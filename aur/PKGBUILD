@@ -8,17 +8,18 @@ arch=('x86_64' 'aarch64')
 url="https://github.com/vbasky/hatch"
 license=('MIT')
 depends=(
-  'webkit2gtk-4.1'
-  'gtk3'
-  'libappindicator-gtk3'
-  'librsvg'
-  'patchelf'
+  'qt6-base'
+  'qt6-webengine'
+  'layer-shell-qt'
+  'kwindowsystem'
 )
 makedepends=(
   'nodejs'
   'pnpm'
   'rust'
   'cargo'
+  'gcc'
+  'pkgconf'
 )
 source=("$pkgname-$pkgver.tar.gz::https://github.com/vbasky/hatch/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('SKIP')
@@ -28,11 +29,14 @@ build() {
   pnpm install --frozen-lockfile
   node scripts/build.mjs
   node scripts/prepare-tauri-resources.mjs
-  pnpm exec tauri build --bundles app
+  cargo build --release --manifest-path src-tauri/Cargo.toml
 }
 
 package() {
   cd "$srcdir/hatch-$pkgver"
   install -Dm755 "src-tauri/target/release/hatch" "$pkgdir/usr/bin/hatch"
   install -Dm644 "assets/hatch-app-icon.svg" "$pkgdir/usr/share/icons/hicolor/scalable/apps/hatch.svg"
+  install -Dm644 "assets/linux/hatch.desktop" "$pkgdir/usr/share/applications/hatch.desktop"
+  install -d "$pkgdir/usr/share/hatch"
+  cp -a src-tauri/resources/. "$pkgdir/usr/share/hatch/"
 }

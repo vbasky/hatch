@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { copyFileSync, cpSync, mkdirSync, rmSync } from "node:fs";
-import { execFileSync, spawnSync } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { isAbsolute, join } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -11,6 +11,21 @@ export const DEV_EXTENSIONS_DIR_ENV = "HATCH_DEV_EXTENSIONS_DIR";
 
 function commandStatus(result) {
   return typeof result.status === "number" ? result.status : 1;
+}
+
+function tauriCli(dir) {
+  return join(dir, "node_modules/@tauri-apps/cli/tauri.js");
+}
+
+function spawnDev(spawnSyncFn, dir, env, platform) {
+  if (platform === "linux") {
+    return spawnSyncFn("cargo", ["run", "--manifest-path", join(dir, "src-tauri/Cargo.toml")], {
+      cwd: dir,
+      env,
+      stdio: "inherit",
+    });
+  }
+  return spawnSyncFn("node", [tauriCli(dir), "dev"], { cwd: dir, env, stdio: "inherit" });
 }
 
 function gitRoot(cwd, execFileSyncFn) {
@@ -36,6 +51,7 @@ function prepareDevExtensions({ rootDir, devExtensionsDir, mkdirSyncFn, copyFile
 export function runDev({
   cwd = process.cwd(),
   env = process.env,
+  platform = process.platform,
   execFileSync: execFileSyncFn = execFileSync,
   spawnSync: spawnSyncFn = spawnSync,
   mkdirSync: mkdirSyncFn = mkdirSync,
@@ -43,7 +59,7 @@ export function runDev({
   cpSync: cpSyncFn = cpSync,
 } = {}) {
   if (env[ACTIVE_ENV] === "1") {
-    return commandStatus(spawnSyncFn("pnpm", ["exec", "tauri", "dev"], { cwd, env, stdio: "inherit" }));
+    return commandStatus(spawnDev(spawnSyncFn, cwd, env, platform));
   }
 
   const rootDir = gitRoot(cwd, execFileSyncFn);
@@ -52,22 +68,28 @@ export function runDev({
   execFileSyncFn("node", ["scripts/build-adapters.mjs"], { cwd: rootDir, stdio: "inherit" });
   execFileSyncFn("node", ["scripts/build-host.mjs"], { cwd: rootDir, stdio: "inherit" });
 
-  return commandStatus(
-    spawnSyncFn("pnpm", ["exec", "tauri", "dev"], {
+  if (platform === "linux" && spawnSyncFn === spawnSync) {
+    spawn("node", [join(rootDir, "node_modules/vite/bin/vite.js"), "--host", "127.0.0.1"], {
       cwd: rootDir,
-      env: {
-        ...env,
-        [ACTIVE_ENV]: "1",
-        [EXTENSIONS_DIR_ENV]: devExtensionsDir,
-      },
+      env: { ...env, [ACTIVE_ENV]: "1" },
       stdio: "inherit",
-    }),
+      detached: true,
+    });
+  }
+
+  return commandStatus(
+    spawnDev(spawnSyncFn, rootDir, {
+      ...env,
+      [ACTIVE_ENV]: "1",
+      [EXTENSIONS_DIR_ENV]: devExtensionsDir,
+    }, platform),
   );
 }
 
 export function resetDevWorkspace({
   cwd = process.cwd(),
   env = process.env,
+  platform = process.platform,
   execFileSync: execFileSyncFn = execFileSync,
   spawnSync: spawnSyncFn = spawnSync,
   mkdirSync: mkdirSyncFn = mkdirSync,
@@ -83,6 +105,7 @@ export function resetDevWorkspace({
   return runDev({
     cwd: rootDir,
     env,
+    platform,
     execFileSync: execFileSyncFn,
     spawnSync: spawnSyncFn,
     mkdirSync: mkdirSyncFn,

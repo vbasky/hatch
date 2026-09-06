@@ -51,7 +51,58 @@ function gsettingsGet(key: string): string | null {
   }
 }
 
+function xdgPortalPrefersDark(): boolean | null {
+  try {
+    const ran = spawnSync(
+      "gdbus",
+      [
+        "call",
+        "--session",
+        "--dest",
+        "org.freedesktop.portal.Desktop",
+        "--object-path",
+        "/org/freedesktop/portal/desktop",
+        "--method",
+        "org.freedesktop.portal.Settings.Read",
+        "org.freedesktop.appearance",
+        "color-scheme",
+      ],
+      { encoding: "utf8", timeout: 2000 },
+    );
+    if (ran.error || ran.status !== 0) return null;
+    const match = (ran.stdout ?? "").match(/uint32\s+(\d+)/);
+    if (!match) return null;
+    if (match[1] === "1") return true;
+    if (match[1] === "2") return false;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function kdePrefersDark(): boolean | null {
+  try {
+    const ran = spawnSync(
+      "kreadconfig6",
+      ["--file", "kdeglobals", "--group", "General", "--key", "ColorScheme"],
+      { encoding: "utf8", timeout: 2000 },
+    );
+    if (ran.error || ran.status !== 0) return null;
+    const scheme = (ran.stdout ?? "").trim().toLowerCase();
+    if (!scheme) return null;
+    if (scheme.includes("dark") || scheme.includes("night")) return true;
+    if (scheme.includes("light") || scheme.includes("day")) return false;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 function linuxPrefersDark(): boolean | null {
+  const portal = xdgPortalPrefersDark();
+  if (portal != null) return portal;
+  const kde = kdePrefersDark();
+  if (kde != null) return kde;
   const colorScheme = gsettingsGet("color-scheme");
   if (colorScheme != null) return looksDark(colorScheme);
   const gtkTheme = gsettingsGet("gtk-theme");

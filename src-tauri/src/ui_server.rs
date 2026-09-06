@@ -13,10 +13,12 @@ pub struct UiServerConfig {
   pub ui_root: PathBuf,
   pub widget_cache_dir: PathBuf,
   pub rpc: RpcHandler,
+  pub bind: Option<String>,
 }
 
 pub async fn bind_ui_server(config: UiServerConfig) -> Result<(u16, tokio::task::JoinHandle<()>), String> {
-  let listener = TcpListener::bind("127.0.0.1:0")
+  let bind = config.bind.as_deref().unwrap_or("127.0.0.1:0");
+  let listener = TcpListener::bind(bind)
     .await
     .map_err(|error| error.to_string())?;
   let port = listener.local_addr().map_err(|error| error.to_string())?.port();
@@ -29,6 +31,7 @@ pub async fn bind_ui_server(config: UiServerConfig) -> Result<(u16, tokio::task:
         ui_root: config.ui_root.clone(),
         widget_cache_dir: config.widget_cache_dir.clone(),
         rpc: config.rpc.clone(),
+        bind: config.bind.clone(),
       };
       tokio::spawn(async move {
         let Ok((method, path, body)) = read_http_message(&mut stream).await else {
