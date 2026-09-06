@@ -544,56 +544,32 @@ html.plasma-native #root {
   font-family: "Noto Sans", "IBM Plex Sans", "Segoe UI", sans-serif;
 }
 
-html.plasma-native.light,
-html.plasma-native[data-theme="light"] {
-  --ink-100: #232629;
-  --ink-200: #232629;
-  --ink-strong: #232629;
-  --ink: #232629;
-  --ink-muted: #4a4c4f;
-  --ink-soft: #64676b;
-  --ink-label: #7a7e83;
-  --ink-faint: #8c9096;
-  --color-ink-strong: #232629;
-  --color-ink: #232629;
-  --color-ink-muted: #4a4c4f;
-  --color-ink-soft: #64676b;
-  --color-ink-label: #7a7e83;
-  --color-ink-faint: #8c9096;
-}
-
-html.plasma-native.dark,
-html.plasma-native[data-theme="dark"] {
-  --ink-100: #fcfcfc;
-  --ink-200: #fcfcfc;
-  --ink-strong: #fcfcfc;
-  --ink: #fcfcfc;
-  --ink-muted: #cfcfcf;
-  --ink-soft: #b0b0b0;
-  --ink-label: #9a9a9a;
-  --ink-faint: #8a8a8a;
-  --color-ink-strong: #fcfcfc;
-  --color-ink: #fcfcfc;
-  --color-ink-muted: #cfcfcf;
-  --color-ink-soft: #b0b0b0;
-  --color-ink-label: #9a9a9a;
-  --color-ink-faint: #8a8a8a;
+html.plasma-native {
+  --ink-100: var(--plasma-window-text, CanvasText);
+  --ink-200: var(--plasma-window-text, CanvasText);
+  --ink-strong: var(--plasma-window-text, CanvasText);
+  --ink: var(--plasma-window-text, CanvasText);
+  --ink-muted: color-mix(in srgb, var(--plasma-window-text, CanvasText) 78%, var(--plasma-window, Canvas));
+  --ink-soft: color-mix(in srgb, var(--plasma-window-text, CanvasText) 62%, var(--plasma-window, Canvas));
+  --ink-label: color-mix(in srgb, var(--plasma-window-text, CanvasText) 50%, var(--plasma-window, Canvas));
+  --ink-faint: color-mix(in srgb, var(--plasma-window-text, CanvasText) 42%, var(--plasma-window, Canvas));
+  --color-ink-strong: var(--plasma-window-text, CanvasText);
+  --color-ink: var(--plasma-window-text, CanvasText);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-soft: var(--ink-soft);
+  --color-ink-label: var(--ink-label);
+  --color-ink-faint: var(--ink-faint);
 }
 
 html.plasma-native .app-shell {
-  background: color-mix(in srgb, var(--plasma-window, #eff0f1) 90%, transparent);
-  border: 1px solid color-mix(in srgb, var(--plasma-window-text, #232629) 18%, transparent);
+  background: color-mix(in srgb, var(--plasma-window, Canvas) 90%, transparent);
+  border: 1px solid color-mix(in srgb, var(--plasma-window-text, CanvasText) 18%, transparent);
   border-radius: 8px;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 1px 0 color-mix(in srgb, var(--plasma-window-text, CanvasText) 18%, transparent),
     0 12px 32px rgba(0, 0, 0, 0.16);
-  color: #232629;
+  color: var(--plasma-window-text, CanvasText);
   font-family: "Noto Sans", "IBM Plex Sans", "Segoe UI", sans-serif;
-}
-
-html.plasma-native.dark .app-shell,
-html.plasma-native[data-theme="dark"] .app-shell {
-  color: #fcfcfc;
 }
 
 html.plasma-native .settings-overlay,
@@ -606,17 +582,12 @@ html.plasma-native .pop-head {
 }
 
 html.plasma-native .pop-head .mark {
-  color: #232629;
+  color: var(--plasma-window-text, CanvasText);
   font-family: "Noto Sans", "IBM Plex Sans", "Segoe UI", sans-serif;
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.01em;
   text-transform: capitalize;
-}
-
-html.plasma-native.dark .pop-head .mark,
-html.plasma-native[data-theme="dark"] .pop-head .mark {
-  color: #fcfcfc;
 }
 
 html.plasma-native .pop-body {
@@ -634,12 +605,7 @@ html.plasma-native .composer .send {
 }
 
 html.plasma-native .composer textarea {
-  color: #232629;
-}
-
-html.plasma-native.dark .composer textarea,
-html.plasma-native[data-theme="dark"] .composer textarea {
-  color: #fcfcfc;
+  color: var(--plasma-window-text, CanvasText);
 }
 
 html.plasma-native .composer textarea::placeholder {

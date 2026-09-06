@@ -114,13 +114,12 @@
     color-scheme: light;
   }
 
-  html.plasma-native.light,
-  html.plasma-native[data-theme="light"] {
-    --color-ink-strong: #232629;
-    --color-ink: #232629;
-    --color-ink-muted: #4a4c4f;
-    --color-ink-soft: #64676b;
-    --color-ink-label: #7a7e83;
-    --color-ink-faint: #8c9096;
+  html.plasma-native {
+    --color-ink-strong: var(--plasma-window-text, CanvasText);
+    --color-ink: var(--plasma-window-text, CanvasText);
+    --color-ink-muted: color-mix(in srgb, var(--plasma-window-text, CanvasText) 78%, var(--plasma-window, Canvas));
+    --color-ink-soft: color-mix(in srgb, var(--plasma-window-text, CanvasText) 62%, var(--plasma-window, Canvas));
+    --color-ink-label: color-mix(in srgb, var(--plasma-window-text, CanvasText) 50%, var(--plasma-window, Canvas));
+    --color-ink-faint: color-mix(in srgb, var(--plasma-window-text, CanvasText) 42%, var(--plasma-window, Canvas));
   }
 }

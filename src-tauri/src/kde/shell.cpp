@@ -69,14 +69,15 @@ QString color_css(const QColor &color);
 QString plasma_native_script();
 
 bool system_is_dark() {
+  // Match the fill (--plasma-window comes from QPalette::Window). colorScheme
+  // can disagree with a dark Plasma theme and leave light-mode black type on
+  // a dark frosted panel.
+  const QColor window = QGuiApplication::palette().color(QPalette::Window);
+  if (window.isValid()) {
+    return window.lightness() < 128;
+  }
   const auto scheme = QGuiApplication::styleHints()->colorScheme();
-  if (scheme == Qt::ColorScheme::Dark) {
-    return true;
-  }
-  if (scheme == Qt::ColorScheme::Light) {
-    return false;
-  }
-  return QGuiApplication::palette().color(QPalette::Window).lightness() < 128;
+  return scheme == Qt::ColorScheme::Dark;
 }
 
 void apply_system_theme() {

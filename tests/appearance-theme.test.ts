@@ -34,8 +34,8 @@ describe("appearance follow-system default", () => {
     const css = await readFile(resolve(import.meta.dirname, "../src/renderer/styles.css"), "utf8");
     expect(css).toContain("html.plasma-native");
     expect(css).toContain("Noto Sans");
-    expect(css).toContain("color-mix(in srgb, var(--plasma-window, #eff0f1) 90%, transparent)");
-    expect(css).toContain("color: #232629");
+    expect(css).toContain("color-mix(in srgb, var(--plasma-window, Canvas) 90%, transparent)");
+    expect(css).toContain("color: var(--plasma-window-text, CanvasText)");
   });
 
   it("reads KDE/xdg color-scheme instead of only GNOME gsettings", async () => {
