@@ -1,7 +1,7 @@
 # Development
 
 Working on Hatch itself.
-End users should install the Homebrew Cask (see the [README](../README.md#quick-start)).
+End users should install a published build: the `.deb`/`.rpm` from the [latest GitHub release](https://github.com/vbasky/hatch/releases) on Linux, or run from source below on macOS (see the [README](../README.md#quick-start)).
 
 ## Setup
 
@@ -68,14 +68,13 @@ cargo build --release --manifest-path src-tauri/Cargo.toml
 
 The binary lands at `src-tauri/target/release/hatch`. Packaged installs load UI, adapters, and the extension template from `/usr/share/hatch`. On Wayland the popover is a layer-shell surface anchored to the panel (regular `setGeometry` is ignored by the compositor); if tray geometry is missing it uses the cursor, then pins above or below the panel.
 
-Arch Linux ships via the [AUR PKGBUILD](../aur/PKGBUILD), which builds against system Qt 6 WebEngine. The release workflow builds the Linux binary, uploads it to the GitHub release, and updates the AUR package and Homebrew cask.
+An [AUR PKGBUILD](../aur/PKGBUILD) is kept in-repo (not published to the AUR) which builds against system Qt 6 WebEngine. The release workflow builds the Linux binary and uploads the deb/rpm to the GitHub release.
 
 > Note: Linux packages are built and published from the `release.yml` workflow; there is no separate Linux CI job on pull requests beyond `cargo check` and the JS checks in `ci.yml`.
 
 ## Hero video
 
-The README hero animation is committed from `marketing-video/hatch-marketing-square.gif`.
-Use the HyperFrames project in `marketing-video/` to revise it:
+The README currently has no hero animation. Recording a fresh hatch demo is still pending; the `marketing-video/` sources are stale baby-menu branding. Use the HyperFrames project in `marketing-video/` to revise it once re-recorded:
 
 ```sh
 pnpm --dir marketing-video check    # validate the composition

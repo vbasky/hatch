@@ -49,55 +49,13 @@ Releases are cut by pushing a version tag (`v*.*.*`, matching your other project
 2. Update `CHANGELOG.md` with the new version's notes (conventional-commit style).
 3. Commit, then tag: `git tag v0.2.0 && git push origin v0.2.0`.
 
-The tag push triggers the `release.yml` workflow, which builds the Linux bundles (deb/rpm), builds the universal macOS app, signs every code object with `Developer ID Application: YOUR_NAME (YOUR_TEAM_ID)`, notarizes and staples the app and DMG, verifies the publication-ready DMG, computes its checksum, uploads all artifacts to the GitHub Release, then updates `vbasky/homebrew-tap` and the AUR package.
-Any signing, notarization, verification, packaged runtime, checksum, or GitHub upload failure fails the workflow and stops before the Homebrew and AUR updates.
-The generated Homebrew Cask quits Hatch during upgrade and relaunches it after installation only when the app was already running before uninstall started.
+The tag push triggers the `release.yml` workflow, which builds the Linux bundles (deb/rpm) and uploads all artifacts to the GitHub Release.
+Any packaged runtime, checksum, or GitHub upload failure fails the workflow.
 
-Maintainers must keep these repository secrets provisioned from the canonical secure owners:
-
-- `MAC_DEVELOPER_ID_CERT_P12` - base64 of the password-protected Developer ID Application certificate and private key for Team `YOUR_TEAM_ID`.
-- `MAC_DEVELOPER_ID_CERT_PASSWORD` - the p12 export password.
-- `APP_STORE_CONNECT_KEY_ID`, `APP_STORE_CONNECT_ISSUER_ID`, and `APP_STORE_CONNECT_API_KEY` - the App Store Connect API credentials used by `notarytool`; the API key is base64-encoded p8 content.
-- `HOMEBREW_TAP_TOKEN` - write access to `vbasky/homebrew-tap` for the final cask update.
+macOS distribution (signed DMG, Homebrew tap) and the AUR package are dropped from the release plans for now. The corresponding `release.yml` steps are stale: do not upload artifacts or update any tap by hand in the meantime.
 
 Never commit or print credential contents. Missing or malformed secrets fail the real release job; pull-request CI remains secret-free and validates the release config through `tests/release-config.test.ts`.
 Maintainers must also keep the `HATCH_UMAMI_WEBSITE_ID` GitHub Actions repository variable configured for packaged-release telemetry; it is intentionally a variable rather than a secret because the id is baked into the app and sent in Umami payloads.
-
-To release, push the tag and require the `release.yml` workflow's macOS job to pass. Do not upload artifacts or update the tap by hand.
-For a post-release check of exactly the downloaded artifact on macOS:
-
-```sh
-VERSION=x.y.z # Replace with the released version (no leading v).
-TAG="v${VERSION}"
-mkdir -p verify-hatch/mount
-
-gh release download "$TAG" --pattern "Hatch-v${VERSION}.dmg" --dir verify-hatch
-DMG="$PWD/verify-hatch/Hatch-v${VERSION}.dmg"
-hdiutil attach "$DMG" -readonly -nobrowse -mountpoint "$PWD/verify-hatch/mount"
-trap 'hdiutil detach "$PWD/verify-hatch/mount" >/dev/null' EXIT
-APP="$PWD/verify-hatch/mount/Hatch.app"
-
-test "$(plutil -extract CFBundleIdentifier raw -o - "$APP/Contents/Info.plist")" = \
-  "com.hatch.app"
-test "$(plutil -extract CFBundleShortVersionString raw -o - "$APP/Contents/Info.plist")" = \
-  "$VERSION"
-codesign --verify --deep --strict --verbose=4 "$APP"
-SIGNATURE="$(codesign -d --verbose=4 "$APP" 2>&1)"
-grep -Fq 'Identifier=com.hatch.app' <<<"$SIGNATURE"
-grep -Fq 'TeamIdentifier=YOUR_TEAM_ID' <<<"$SIGNATURE"
-grep -Fq 'Authority=Developer ID Application: YOUR_NAME (YOUR_TEAM_ID)' <<<"$SIGNATURE"
-grep -Eq '^CodeDirectory .*flags=.*runtime' <<<"$SIGNATURE"
-grep -Eq '^Timestamp=.+$' <<<"$SIGNATURE"
-spctl --assess --type execute --verbose=4 "$APP"
-xcrun stapler validate "$APP"
-xcrun stapler validate "$DMG"
-lipo "$APP/Contents/MacOS/hatch" -verify_arch arm64 x86_64
-
-hdiutil detach "$PWD/verify-hatch/mount"
-trap - EXIT
-```
-
-The expected Gatekeeper result is `accepted` with source `Notarized Developer ID`. The workflow runs these checks, plus per-bundle and per-Mach-O identity, hardened-runtime, and timestamp checks, against the mounted publication-ready DMG before upload.
 
 ## Questions
 
