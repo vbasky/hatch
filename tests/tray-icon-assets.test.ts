@@ -6,6 +6,8 @@ import { describe, expect, it } from "vitest";
 const TRAY_DIR = resolve(import.meta.dirname, "../assets/tray");
 const LIB_RS = resolve(import.meta.dirname, "../src-tauri/src/tauri_app.rs");
 const TRAY_RS = resolve(import.meta.dirname, "../src-tauri/src/tray.rs");
+const KDE_MOD_RS = resolve(import.meta.dirname, "../src-tauri/src/kde/mod.rs");
+const SHELL_CPP = resolve(import.meta.dirname, "../src-tauri/src/kde/shell.cpp");
 
 type RgbaPng = {
   width: number;
@@ -153,5 +155,17 @@ describe("Hatch tray template", () => {
     expect(lib).toContain("hatch_tray_icon_path");
     expect(lib).toContain("size_tray_icon_to_menu_bar");
     expect(lib).not.toMatch(/tray\/hatchTemplate\.png"/);
+  });
+
+  it("insets the Plasma tray glyph to the 18/22 status-item ratio", async () => {
+    const tray = await readFile(TRAY_RS, "utf8");
+    const kde = await readFile(KDE_MOD_RS, "utf8");
+    const shell = await readFile(SHELL_CPP, "utf8");
+    expect(tray).toMatch(/TRAY_ICON_SLOT_POINTS:\s*f64\s*=\s*22(?:\.0)?/);
+    expect(tray).toContain("TRAY_ICON_POINT_SIZE / TRAY_ICON_SLOT_POINTS");
+    expect(kde).toContain("tray_icon_panel_scale()");
+    expect(shell).toContain("g_tray_icon_scale");
+    expect(shell).toContain("panel_tray_icon");
+    expect(shell).not.toContain("g_tray->setIcon(QIcon(path))");
   });
 });
