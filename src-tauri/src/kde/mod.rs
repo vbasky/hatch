@@ -29,6 +29,7 @@ unsafe extern "C" {
   fn hatch_kde_main(
     icon_on_dark: *const c_char,
     icon_on_light: *const c_char,
+    icon_scale: f64,
     ui_url: *const c_char,
     callbacks: HatchKdeCallbacks,
     user: *mut c_void,
@@ -381,6 +382,7 @@ pub fn run() {
     hatch_kde_main(
       icon_dark.as_ptr(),
       icon_light.as_ptr(),
+      crate::tray::tray_icon_panel_scale(),
       url.as_ptr(),
       HatchKdeCallbacks {
         on_toggle: Some(on_toggle),
