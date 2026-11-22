@@ -148,7 +148,11 @@ function classifyHttp(status: number, body: unknown): Failure | null {
   const record = asRecord(body);
   const error = asRecord(record?.error);
   const code = stringValue(error?.code) ?? "";
-  if (status === 401 || code === "UNAUTHORIZED") return fail("credential_rejected");
+  if (status === 401 || code === "UNAUTHORIZED") {
+    const message = stringValue(error?.message) ?? "";
+    if (/expired|log in again|cmd login/i.test(message)) return fail("auth_required");
+    return fail("credential_rejected");
+  }
   if (status === 403) return fail("credential_rejected");
   if (status === 429) return fail("rate_limited");
   if (status === 0) return fail("connectivity");
