@@ -7,13 +7,13 @@ import {
 } from "./store";
 
 const FAILURE_COPY: Record<OpenCodeQuotaFailureKind, string> = {
-  auth_required: "connect opencode go in opencode",
+  auth_required: "connect opencode in opencode",
   auth_source_missing: "opencode auth file not found",
   auth_source_unreadable: "could not read opencode auth file",
   auth_source_malformed: "opencode auth file is not valid json",
-  auth_source_incompatible: "no opencode go key in auth file",
-  credential_rejected: "opencode rejected this go key",
-  subscription_required: "opencode go subscription required",
+  auth_source_incompatible: "no opencode key in auth file",
+  credential_rejected: "opencode rejected this key",
+  subscription_required: "opencode subscription required",
   connectivity: "could not reach opencode usage",
   rate_limited: "opencode usage rate limited; retry later",
   quota_service: "opencode usage service error",

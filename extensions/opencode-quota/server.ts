@@ -23,13 +23,13 @@ const CACHE_TABLE = `CREATE TABLE IF NOT EXISTS opencode_quota_cache (
 type Failure = Extract<OpenCodeQuotaResult, { ok: false }>;
 
 const COPY: Record<OpenCodeQuotaFailureKind, string> = {
-  auth_required: "connect opencode go in opencode",
+  auth_required: "connect opencode in opencode",
   auth_source_missing: "opencode auth file not found",
   auth_source_unreadable: "could not read opencode auth file",
   auth_source_malformed: "opencode auth file is not valid json",
-  auth_source_incompatible: "no opencode go key in auth file",
-  credential_rejected: "opencode rejected this go key",
-  subscription_required: "opencode go subscription required",
+  auth_source_incompatible: "no opencode key in auth file",
+  credential_rejected: "opencode rejected this key",
+  subscription_required: "opencode subscription required",
   connectivity: "could not reach opencode usage",
   rate_limited: "opencode usage rate limited; retry later",
   quota_service: "opencode usage service error",
@@ -72,7 +72,18 @@ function authFileCandidates(): string[] {
   return names;
 }
 
-function readGoKey(): string | Failure {
+function rememberKey(keys: string[], seen: Set<string>, record: Record<string, unknown> | null) {
+  const key = typeof record?.key === "string" ? record.key.trim() : "";
+  const type = typeof record?.type === "string" ? record.type : "";
+  if (!key || seen.has(key)) return;
+  if (type && type !== "api" && type !== "key") return;
+  seen.add(key);
+  keys.push(key);
+}
+
+function readKeys(): string[] | Failure {
+  const keys: string[] = [];
+  const seen = new Set<string>();
   let fileError: Failure | undefined;
   for (const filePath of authFileCandidates()) {
     try {
@@ -85,10 +96,9 @@ function readGoKey(): string | Failure {
       }
       const store = asRecord(parsed);
       if (!store) return fail("auth_source_malformed");
-      const go = asRecord(store["opencode-go"]);
-      const key = typeof go?.key === "string" ? go.key.trim() : "";
-      const type = typeof go?.type === "string" ? go.type : "";
-      if (key && (!type || type === "api")) return key;
+      rememberKey(keys, seen, asRecord(store["opencode-go"]));
+      rememberKey(keys, seen, asRecord(store.opencode));
+      if (keys.length > 0) break;
       fileError = fail("auth_source_incompatible");
     } catch (error) {
       const code = (error as NodeJS.ErrnoException).code;
@@ -97,7 +107,10 @@ function readGoKey(): string | Failure {
     }
   }
   const envKey = process.env.OPENCODE_API_KEY;
-  if (typeof envKey === "string" && envKey.trim()) return envKey.trim();
+  if (typeof envKey === "string" && envKey.trim() && !seen.has(envKey.trim())) {
+    keys.push(envKey.trim());
+  }
+  if (keys.length > 0) return keys;
   return fileError ?? fail("auth_source_missing");
 }
 
@@ -216,24 +229,36 @@ function writeCache(db: HatchServerContext["db"], data: OpenCodeQuotaData) {
   );
 }
 
+function authFailure(kind: OpenCodeQuotaFailureKind): boolean {
+  return kind === "credential_rejected" || kind === "subscription_required";
+}
+
 async function acquire(context: HatchServerContext): Promise<OpenCodeQuotaResult> {
   const cached = readCache(context.db);
-  const key = readGoKey();
-  if (isFailure(key)) return key;
-  const response = await getUsage(key);
-  if (response.error === "timeout" || (response.status === 0 && !response.body)) {
-    if (cached) return { ok: true, checkedAt: nowIso(), data: { ...cached, stale: true } };
-    return fail("connectivity");
-  }
-  const parsed = parseUsage(response.body, response.status);
-  if (isFailure(parsed)) {
-    if (cached && STALE_ELIGIBLE.has(parsed.kind)) {
-      return { ok: true, checkedAt: nowIso(), data: { ...cached, stale: true } };
+  const keys = readKeys();
+  if (isFailure(keys)) return keys;
+  let rejected: Failure | null = null;
+  for (const key of keys) {
+    const response = await getUsage(key);
+    if (response.error === "timeout" || (response.status === 0 && !response.body)) {
+      if (cached) return { ok: true, checkedAt: nowIso(), data: { ...cached, stale: true } };
+      return fail("connectivity");
     }
-    return parsed;
+    const parsed = parseUsage(response.body, response.status);
+    if (isFailure(parsed)) {
+      if (authFailure(parsed.kind)) {
+        rejected = parsed;
+        continue;
+      }
+      if (cached && STALE_ELIGIBLE.has(parsed.kind)) {
+        return { ok: true, checkedAt: nowIso(), data: { ...cached, stale: true } };
+      }
+      return parsed;
+    }
+    writeCache(context.db, parsed);
+    return { ok: true, checkedAt: nowIso(), data: parsed };
   }
-  writeCache(context.db, parsed);
-  return { ok: true, checkedAt: nowIso(), data: parsed };
+  return rejected ?? fail("credential_rejected");
 }
 
 async function getQuota(_input: unknown, context: HatchServerContext): Promise<OpenCodeQuotaResult> {
