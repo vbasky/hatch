@@ -6,8 +6,6 @@ import { describe, expect, it } from "vitest";
 const TRAY_DIR = resolve(import.meta.dirname, "../assets/tray");
 const LIB_RS = resolve(import.meta.dirname, "../src-tauri/src/tauri_app.rs");
 const TRAY_RS = resolve(import.meta.dirname, "../src-tauri/src/tray.rs");
-const KDE_MOD_RS = resolve(import.meta.dirname, "../src-tauri/src/kde/mod.rs");
-const SHELL_CPP = resolve(import.meta.dirname, "../src-tauri/src/kde/shell.cpp");
 
 type RgbaPng = {
   width: number;
@@ -157,15 +155,14 @@ describe("Hatch tray template", () => {
     expect(lib).not.toMatch(/tray\/hatchTemplate\.png"/);
   });
 
-  it("insets the Plasma tray glyph to the 18/22 status-item ratio", async () => {
-    const tray = await readFile(TRAY_RS, "utf8");
-    const kde = await readFile(KDE_MOD_RS, "utf8");
-    const shell = await readFile(SHELL_CPP, "utf8");
-    expect(tray).toMatch(/TRAY_ICON_SLOT_POINTS:\s*f64\s*=\s*22(?:\.0)?/);
-    expect(tray).toContain("TRAY_ICON_POINT_SIZE / TRAY_ICON_SLOT_POINTS");
-    expect(kde).toContain("tray_icon_panel_scale()");
-    expect(shell).toContain("g_tray_icon_scale");
-    expect(shell).toContain("panel_tray_icon");
-    expect(shell).not.toContain("g_tray->setIcon(QIcon(path))");
+  it("draws the Plasma tray glyph smaller than the menu-bar template", async () => {
+    const white = glyphBox(decodeRgbaPng(await readFile(resolve(TRAY_DIR, "hatch.png"))));
+    const black = glyphBox(decodeRgbaPng(await readFile(resolve(TRAY_DIR, "hatch-light.png"))));
+    for (const box of [white, black]) {
+      expect(box.heightRatio).toBeGreaterThanOrEqual(0.58);
+      expect(box.heightRatio).toBeLessThanOrEqual(0.68);
+      expect(box.widthRatio).toBeGreaterThanOrEqual(0.5);
+      expect(box.widthRatio).toBeLessThanOrEqual(0.64);
+    }
   });
 });

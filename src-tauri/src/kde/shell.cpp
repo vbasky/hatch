@@ -21,9 +21,7 @@
 #include <QMargins>
 #include <QMenu>
 #include <QMetaObject>
-#include <QPainter>
 #include <QPalette>
-#include <QPixmap>
 #include <QRect>
 #include <QScreen>
 
@@ -55,7 +53,6 @@ QWebEngineView *g_popover = nullptr;
 QSystemTrayIcon *g_tray = nullptr;
 QString g_icon_on_dark;
 QString g_icon_on_light;
-double g_tray_icon_scale = 1.0;
 QRect g_last_popover;
 QTimer *g_follow_timer = nullptr;
 bool g_follow_tick = false;
@@ -83,41 +80,12 @@ bool system_is_dark() {
   return scheme == Qt::ColorScheme::Dark;
 }
 
-QIcon panel_tray_icon(const QString &path) {
-  const QPixmap source(path);
-  if (source.isNull()) {
-    return QIcon(path);
-  }
-  // Neighboring Plasma tray icons leave a margin. Draw Hatch inside the same
-  // canvas at the macOS 18/22 status-item ratio so the mark is slightly smaller.
-  double scale = g_tray_icon_scale;
-  if (!(scale > 0.0) || scale > 1.0) {
-    scale = 1.0;
-  }
-  if (scale >= 0.999) {
-    return QIcon(source);
-  }
-  QPixmap canvas(source.size());
-  canvas.fill(Qt::transparent);
-  const int width = qMax(1, qRound(source.width() * scale));
-  const int height = qMax(1, qRound(source.height() * scale));
-  QPainter painter(&canvas);
-  painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
-  painter.drawPixmap(
-    (canvas.width() - width) / 2,
-    (canvas.height() - height) / 2,
-    source.scaled(width, height, Qt::KeepAspectRatio, Qt::SmoothTransformation)
-  );
-  painter.end();
-  return QIcon(canvas);
-}
-
 void apply_system_theme() {
   const bool dark = system_is_dark();
   if (g_tray) {
     const QString &path = dark ? g_icon_on_dark : g_icon_on_light;
     if (!path.isEmpty()) {
-      g_tray->setIcon(panel_tray_icon(path));
+      g_tray->setIcon(QIcon(path));
     }
   }
   if (!g_popover) {
@@ -621,7 +589,6 @@ void place_popover(const QRect &popover) {
 int hatch_kde_main(
   const char *icon_on_dark,
   const char *icon_on_light,
-  double icon_scale,
   const char *ui_url,
   HatchKdeCallbacks callbacks,
   void *user
@@ -630,7 +597,6 @@ int hatch_kde_main(
   g_user = user;
   g_icon_on_dark = QString::fromUtf8(icon_on_dark ? icon_on_dark : "");
   g_icon_on_light = QString::fromUtf8(icon_on_light && icon_on_light[0] != '\0' ? icon_on_light : icon_on_dark);
-  g_tray_icon_scale = icon_scale;
 
   static int argc = 1;
   static char arg0[] = "hatch";
