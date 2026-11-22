@@ -3,15 +3,6 @@ use std::path::{Path, PathBuf};
 /// Apple status-item glyphs are 18pt. 22pt overfills the menu bar next to Saturn-class icons.
 pub const TRAY_ICON_POINT_SIZE: f64 = 18.0;
 
-/// The 1x template canvas, and the Plasma tray slot the Linux pixmap is fitted to.
-pub const TRAY_ICON_SLOT_POINTS: f64 = 22.0;
-
-/// Plasma paints a tray pixmap across the whole slot. Inset by the macOS 18/22
-/// ratio so the glyph sits slightly under neighboring panel icons.
-pub fn tray_icon_panel_scale() -> f64 {
-  TRAY_ICON_POINT_SIZE / TRAY_ICON_SLOT_POINTS
-}
-
 pub fn hatch_tray_icon_path(assets_dir: &Path) -> PathBuf {
   #[cfg(target_os = "macos")]
   {
@@ -96,10 +87,5 @@ mod tests {
   #[test]
   fn menu_bar_point_size_matches_status_item_slot() {
     assert_eq!(TRAY_ICON_POINT_SIZE, 18.0);
-    assert_eq!(TRAY_ICON_SLOT_POINTS, 22.0);
-    let scale = tray_icon_panel_scale();
-    assert!(scale < 1.0, "panel glyph should be smaller than the tray slot");
-    assert!(scale > 0.75, "panel glyph should only be slightly smaller");
-    assert!((scale - (18.0 / 22.0)).abs() < f64::EPSILON);
   }
 }

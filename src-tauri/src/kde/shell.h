@@ -14,7 +14,6 @@ typedef struct HatchKdeCallbacks {
 int hatch_kde_main(
   const char *icon_on_dark,
   const char *icon_on_light,
-  double icon_scale,
   const char *ui_url,
   HatchKdeCallbacks callbacks,
   void *user
